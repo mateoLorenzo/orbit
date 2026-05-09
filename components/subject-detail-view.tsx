@@ -74,7 +74,7 @@ function formatDate(date: Date): string {
 }
 
 function nodeToContentNode(
-  n: { id: string; title: string; contentBrief: string; progressStatus: 'locked' | 'available' | 'in_progress' | 'mastered' },
+  n: { id: string; slug: string; title: string; contentBrief: string; progressStatus: 'locked' | 'available' | 'in_progress' | 'mastered' },
   index: number,
 ): ContentNode {
   const statusMap = {
@@ -84,7 +84,7 @@ function nodeToContentNode(
     mastered: 'completado',
   } as const
   return {
-    id: n.id,
+    id: n.slug,
     title: n.title,
     description: n.contentBrief,
     type: 'clase',
@@ -343,15 +343,15 @@ interface SubjectDetailViewProps {
 
 export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   const router = useRouter()
-  const filesQuery = useFiles(subject.id)
-  const uploadMutation = useUploadFile(subject.id)
-  const deleteMutation = useDeleteFile(subject.id)
+  const filesQuery = useFiles(subject.slug)
+  const uploadMutation = useUploadFile(subject.slug)
+  const deleteMutation = useDeleteFile(subject.slug)
   const sources = (filesQuery.data ?? []).map(mapFileRow)
   const [activeTab, setActiveTab] = useState<TabType>('clases')
   const [page, setPage] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const nodesQuery = useNodes(subject.id)
+  const nodesQuery = useNodes(subject.slug)
   const lessons: ContentNode[] = useMemo(
     () => (nodesQuery.data ?? []).map((n, i) => nodeToContentNode(n, i)),
     [nodesQuery.data],
@@ -388,7 +388,7 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   }
 
   const onStartLesson = (node: ContentNode) => {
-    router.push(`/subjects/${subject.id}/lessons/${node.id}`)
+    router.push(`/subjects/${subject.slug}/lessons/${node.id}`)
   }
 
   return (

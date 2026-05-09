@@ -9,8 +9,8 @@ import { mapSubjectRow } from '@/lib/domain/adapters'
 
 export default function SubjectDetailPage() {
   const params = useParams()
-  const id = (params.id as string) ?? ''
-  const { data: dbSubject, isLoading, error } = useSubject(id)
+  const slug = (params.id as string) ?? ''
+  const { data: dbSubject, isLoading, error } = useSubject(slug)
 
   if (isLoading) {
     return (

@@ -13,14 +13,14 @@ import { isDemoSubject, getDemoLessons, getDemoNode } from '@/lib/demo'
 export default function LessonPage() {
   const params = useParams()
   const router = useRouter()
-  const subjectId = (params.id as string) ?? ''
-  const nodeId = (params.nodeId as string) ?? ''
+  const subjectSlug = (params.id as string) ?? ''
+  const nodeSlug = (params.nodeId as string) ?? ''
 
-  const subjectQuery = useSubject(subjectId)
+  const subjectQuery = useSubject(subjectSlug)
   const isDemo = isDemoSubject(subjectQuery.data ?? null)
-  const nodesQuery = useNodes(subjectId)
+  const nodesQuery = useNodes(subjectSlug)
 
-  const onExit = () => router.push(`/subjects/${subjectId}`)
+  const onExit = () => router.push(`/subjects/${subjectSlug}`)
 
   if (subjectQuery.isLoading) {
     return (
@@ -56,7 +56,7 @@ export default function LessonPage() {
 
   // Demo branch: use the existing ModuleLearningFlow with the local fixture.
   if (isDemo) {
-    const demoNode = getDemoNode(nodeId)
+    const demoNode = getDemoNode(nodeSlug)
     if (!demoNode) return null
     const lessons = getDemoLessons()
     const idx = lessons.findIndex((l) => l.id === demoNode.id)
@@ -67,7 +67,7 @@ export default function LessonPage() {
         node={demoNode}
         onExit={onExit}
         onContinueNext={
-          next ? () => router.push(`/subjects/${subjectId}/lessons/${next.id}`) : undefined
+          next ? () => router.push(`/subjects/${subjectSlug}/lessons/${next.id}`) : undefined
         }
       />
     )
@@ -75,7 +75,7 @@ export default function LessonPage() {
 
   // Generic branch: real backend-generated lesson.
   const realNodes = nodesQuery.data ?? []
-  const currentNode = realNodes.find((n) => n.id === nodeId)
+  const currentNode = realNodes.find((n) => n.slug === nodeSlug)
   if (!currentNode) {
     return (
       <div className="flex min-h-screen bg-[#f8f8f8] text-black">
@@ -84,7 +84,7 @@ export default function LessonPage() {
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-2xl font-medium tracking-[-0.5px]">Lección no encontrada</p>
             <Link
-              href={`/subjects/${subjectId}`}
+              href={`/subjects/${subjectSlug}`}
               className="inline-flex h-10 items-center rounded-lg bg-black px-3 text-base font-medium tracking-[-0.32px] text-white transition-colors hover:bg-black/90"
             >
               Volver
@@ -95,18 +95,18 @@ export default function LessonPage() {
     )
   }
 
-  const idx = realNodes.findIndex((n) => n.id === nodeId)
+  const idx = realNodes.findIndex((n) => n.slug === nodeSlug)
   const next = idx >= 0 ? realNodes[idx + 1] : undefined
 
   return (
     <LessonFlowGeneric
       subjectName={subject.name}
-      subjectId={subjectId}
-      nodeId={nodeId}
+      subjectId={subject.id}
+      nodeId={currentNode.id}
       nodeTitle={currentNode.title}
       onExit={onExit}
       onContinueNext={
-        next ? () => router.push(`/subjects/${subjectId}/lessons/${next.id}`) : undefined
+        next ? () => router.push(`/subjects/${subjectSlug}/lessons/${next.slug}`) : undefined
       }
     />
   )
