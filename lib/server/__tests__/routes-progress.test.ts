@@ -20,6 +20,16 @@ function jsonRequest(method: string, body?: unknown): Request {
   })
 }
 
+const fakeSubject = {
+  id: 's1',
+  userId: 'demo',
+  name: 'A',
+  description: null,
+  lastUploadAt: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
 describe('Progress routes (Drizzle)', () => {
   beforeEach(() => {
     vi.mocked(queries.getSubject).mockReset()
@@ -29,15 +39,15 @@ describe('Progress routes (Drizzle)', () => {
   })
 
   it('GET /subjects/:id/progress 404 when subject missing', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(null)
+    vi.mocked(queries.getSubject).mockResolvedValue(null as never)
     const res = await listProgress(jsonRequest('GET'), { params: Promise.resolve({ id: 'nope' }) })
     expect(res.status).toBe(404)
   })
 
   it('GET /subjects/:id/progress returns wrapped array', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue({ id: 's1' })
+    vi.mocked(queries.getSubject).mockResolvedValue(fakeSubject)
     vi.mocked(queries.listProgressForSubject).mockResolvedValue([
-      { id: 'p1', nodeId: 'n1', status: 'dominado', completedAt: null, updatedAt: new Date().toISOString() },
+      { id: 'p1', nodeId: 'n1', status: 'dominado' as const, completedAt: null, updatedAt: new Date() },
     ])
     const res = await listProgress(jsonRequest('GET'), { params: Promise.resolve({ id: 's1' }) })
     expect(res.status).toBe(200)
@@ -46,13 +56,13 @@ describe('Progress routes (Drizzle)', () => {
   })
 
   it('GET /subjects/:id/progress/summary 404 when subject missing', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(null)
+    vi.mocked(queries.getSubject).mockResolvedValue(null as never)
     const res = await getSummary(jsonRequest('GET'), { params: Promise.resolve({ id: 'nope' }) })
     expect(res.status).toBe(404)
   })
 
   it('GET /subjects/:id/progress/summary returns summary', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue({ id: 's1' })
+    vi.mocked(queries.getSubject).mockResolvedValue(fakeSubject)
     vi.mocked(queries.summarizeProgressForSubject).mockResolvedValue({
       total: 4, dominado: 2, enCurso: 1, disponible: 1, bloqueado: 0, percentDominado: 50,
     })
@@ -64,7 +74,7 @@ describe('Progress routes (Drizzle)', () => {
 
   it('PATCH /nodes/:id/status creates Progress', async () => {
     vi.mocked(queries.upsertNodeProgress).mockResolvedValue({
-      id: 'p1', nodeId: 'n1', status: 'dominado', completedAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      id: 'p1', userId: 'demo', nodeId: 'n1', status: 'dominado' as const, completedAt: new Date(), updatedAt: new Date(),
     })
     const res = await patchStatus(jsonRequest('PATCH', { status: 'dominado' }), {
       params: Promise.resolve({ id: 'n1' }),

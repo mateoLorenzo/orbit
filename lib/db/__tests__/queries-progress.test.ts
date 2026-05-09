@@ -27,7 +27,12 @@ import {
 } from '../queries'
 import * as clientModule from '../client'
 
-const mockDb = clientModule.db
+type MockedFn = ReturnType<typeof vi.fn>
+const mockDb = clientModule.db as unknown as {
+  select: MockedFn
+  insert: MockedFn
+  update: MockedFn
+}
 
 describe('progress queries', () => {
   beforeEach(() => {

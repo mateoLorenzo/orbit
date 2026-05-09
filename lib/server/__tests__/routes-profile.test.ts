@@ -18,11 +18,11 @@ function jsonRequest(method: string, body?: unknown): Request {
 
 const seed = {
   userId: 'demo',
-  formatoPreferido: 'texto',
-  horariosActivos: [],
-  erroresRecurrentes: [],
+  formatoPreferido: 'texto' as const,
+  horariosActivos: [] as string[],
+  erroresRecurrentes: [] as string[],
   friccionPromedio: 50,
-  updatedAt: new Date().toISOString(),
+  updatedAt: new Date(),
 }
 
 describe('Profile routes (Drizzle)', () => {
@@ -40,7 +40,7 @@ describe('Profile routes (Drizzle)', () => {
   })
 
   it('PATCH /api/profile merges fields and returns 200', async () => {
-    vi.mocked(queries.updateProfile).mockResolvedValue({ ...seed, formatoPreferido: 'audio' })
+    vi.mocked(queries.updateProfile).mockResolvedValue({ ...seed, formatoPreferido: 'audio' as const })
     const res = await PATCH(jsonRequest('PATCH', { formatoPreferido: 'audio' }))
     expect(res.status).toBe(200)
     const body = await res.json()
