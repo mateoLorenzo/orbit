@@ -1,10 +1,11 @@
 import { eq, desc, and } from 'drizzle-orm'
 import { db, schema } from './client'
+import { CURRENT_USER_ID } from '@/lib/auth/current-user'
 
 // MVP has no auth. All server-side reads/writes use this user_id and the
 // service-role connection (bypassing RLS). Replace with real auth.uid()
 // once login is in place.
-export const DEMO_USER_ID = '00000000-0000-4000-8000-000000000001'
+export const DEMO_USER_ID = CURRENT_USER_ID  // re-export for backwards-compat with route.ts files
 
 export async function listSubjects() {
   return db
