@@ -10,6 +10,8 @@ export interface ModuleLearningFlowProps {
 export interface ContentStep {
   kind: 'content'
   image: string
+  video?: string
+  videoLoop?: boolean
   paragraphs: string[]
 }
 
