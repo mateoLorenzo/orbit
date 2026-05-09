@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useApp } from '@/lib/app-context'
+import { useSubjects } from '@/lib/hooks/use-subjects'
+import { mapSubjectRow } from '@/lib/domain/adapters'
 import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
 import AddSubjectModal from '@/components/add-subject-modal'
@@ -32,7 +33,8 @@ function getDailyChallenge(activeSubjects: Subject[]) {
 
 export default function HomePage() {
   const router = useRouter()
-  const { subjects } = useApp()
+  const { data: dbSubjects = [], isLoading } = useSubjects()
+  const subjects = dbSubjects.map(mapSubjectRow)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'finished'>('active')
 
@@ -56,6 +58,17 @@ export default function HomePage() {
   const handleStartChallenge = () => {
     if (!dailyChallenge) return
     router.push(`/subjects/${dailyChallenge.subject.id}`)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#f8f8f8] text-black">
+        <AppSidebar />
+        <main className="flex min-w-0 flex-1 items-center justify-center">
+          <p className="text-base text-black/50">Cargando materias...</p>
+        </main>
+      </div>
+    )
   }
 
   return (
