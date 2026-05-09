@@ -1,11 +1,16 @@
 'use client'
 
-import { Folder, Settings2 } from 'lucide-react'
+import { Folder, Settings2, User } from 'lucide-react'
 
 export default function AppSidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-[88px] shrink-0 flex-col items-center gap-6 border-r border-black/8 p-6">
-      <div className="size-10 shrink-0 rounded-full bg-[#e1e1e1]" aria-hidden />
+      <div
+        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#e1e1e1] text-black/45"
+        aria-hidden
+      >
+        <User className="size-5" strokeWidth={2} />
+      </div>
       <div className="h-px w-4 shrink-0 bg-black/8" aria-hidden />
 
       <nav className="flex flex-1 flex-col items-center gap-3">
