@@ -7,8 +7,9 @@ import { ContentScreen } from './content-screen'
 import { IntroScreen } from './intro-screen'
 import { FlowHeader } from './primitives'
 import { QuizScreen } from './quiz-screen'
+import { TimelineScreen } from './timeline-screen'
 import { buildSteps } from './steps'
-import type { ModuleLearningFlowProps } from './types'
+import type { ModuleLearningFlowProps, Step } from './types'
 
 export default function ModuleLearningFlow({
   subject,
@@ -33,17 +34,20 @@ export default function ModuleLearningFlow({
       ? SECOND_LESSON_NARRATION
       : undefined
 
-  const totalProgressSteps = steps.filter((item) => item.kind === 'content' || item.kind === 'quiz').length
+  const isProgressStep = (kind: Step['kind']) =>
+    kind === 'content' || kind === 'quiz' || kind === 'timeline'
+
+  const totalProgressSteps = steps.filter((item) => isProgressStep(item.kind)).length
   const completedProgressSteps = steps
     .slice(0, currentStep + 1)
-    .filter((item) => item.kind === 'content' || item.kind === 'quiz').length
+    .filter((item) => isProgressStep(item.kind)).length
 
   const progressPercent =
     step.kind === 'intro' || step.kind === 'done'
       ? 0
       : (completedProgressSteps / totalProgressSteps) * 100
 
-  const showHeader = step.kind === 'content' || step.kind === 'quiz'
+  const showHeader = isProgressStep(step.kind)
 
   const goNext = () => {
     setDirection('forward')
@@ -83,6 +87,9 @@ export default function ModuleLearningFlow({
             onNext={goNext}
             narration={lessonNarration}
           />
+        )}
+        {step.kind === 'timeline' && (
+          <TimelineScreen step={step} onBack={goPrev} onNext={goNext} />
         )}
         {step.kind === 'quiz' && (
           <QuizScreen

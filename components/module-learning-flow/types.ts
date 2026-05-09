@@ -22,7 +22,29 @@ export interface QuizStep {
   correctIndex: number
 }
 
-export type Step = { kind: 'intro' } | ContentStep | QuizStep | { kind: 'done' }
+export interface TimelineEvent {
+  id: string
+  date: string
+  title: string
+  description: string
+  historicalImpact: string
+}
+
+export interface TimelineStep {
+  kind: 'timeline'
+  topic: string
+  title: string
+  subtitle: string
+  intro: string
+  events: TimelineEvent[]
+}
+
+export type Step =
+  | { kind: 'intro' }
+  | ContentStep
+  | QuizStep
+  | TimelineStep
+  | { kind: 'done' }
 
 export interface NarratedLine {
   text: string
