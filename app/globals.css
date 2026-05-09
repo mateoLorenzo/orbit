@@ -109,6 +109,126 @@
   }
 }
 
+@layer components {
+  .ai-speaking-avatar {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-speaking-core {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 0.1);
+    transition:
+      background-color 300ms ease,
+      box-shadow 300ms ease,
+      transform 300ms ease;
+  }
+
+  .ai-speaking-bar {
+    display: block;
+    width: 3px;
+    height: 5px;
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 0.32);
+    transform-origin: bottom;
+    transition:
+      height 250ms ease,
+      background-color 250ms ease,
+      opacity 250ms ease;
+  }
+
+  .ai-speaking-wave {
+    position: absolute;
+    inset: 0.125rem;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  .ai-speaking-avatar--active .ai-speaking-core {
+    background: #d7f8df;
+    box-shadow:
+      inset 0 0 0 1px rgb(70 207 116 / 0.24),
+      0 8px 18px rgb(49 190 94 / 0.16);
+    transform: scale(1.02);
+  }
+
+  .ai-speaking-avatar--active .ai-speaking-bar {
+    background: #151a15;
+    animation: ai-speaking-level 760ms ease-in-out infinite;
+  }
+
+  .ai-speaking-avatar--active .ai-speaking-wave {
+    border-color: rgb(70 207 116 / 0.3);
+    animation: ai-speaking-ripple 1500ms ease-out infinite;
+  }
+
+  .ai-speaking-avatar--active .ai-speaking-wave--inner {
+    animation-delay: 260ms;
+  }
+
+  .ai-speaking-avatar--active .ai-speaking-wave--outer {
+    animation-delay: 40ms;
+  }
+
+  @keyframes ai-speaking-level {
+    0%,
+    100% {
+      height: 5px;
+      opacity: 0.55;
+    }
+    35% {
+      height: 15px;
+      opacity: 1;
+    }
+    65% {
+      height: 9px;
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes ai-speaking-ripple {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.82);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.38);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-speaking-avatar--active .ai-speaking-bar,
+    .ai-speaking-avatar--active .ai-speaking-wave {
+      animation: none;
+    }
+
+    .ai-speaking-avatar--active .ai-speaking-bar {
+      height: 11px;
+      opacity: 1;
+    }
+
+    .ai-speaking-avatar--active .ai-speaking-wave {
+      display: none;
+    }
+  }
+}
+
 /* Pointer cursor on interactive elements — inside @layer utilities so Tailwind v4 emits it */
 @layer utilities {
   button:not(:disabled),
