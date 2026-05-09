@@ -100,6 +100,9 @@ export default $config({
     const imageGenQ = makeQueueWithDlq('ImageGenerationQueue', {
       visibilityTimeout: '120 seconds',
     })
+    const audioNarrationQ = makeQueueWithDlq('AudioNarrationQueue', {
+      visibilityTimeout: '180 seconds',
+    })
 
     // ─── Lambda env shared by all processors ─────────────────────────────
     const lambdaEnv = {
@@ -115,6 +118,7 @@ export default $config({
       GRAPH_RECALC_QUEUE_URL: graphRecalcQ.main.url,
       LESSON_TEXT_QUEUE_URL: lessonTextQ.main.url,
       IMAGE_GEN_QUEUE_URL: imageGenQ.main.url,
+      AUDIO_NARRATION_QUEUE_URL: audioNarrationQ.main.url,
     }
 
     const sharedLink = [
@@ -199,7 +203,7 @@ export default $config({
       memory: '1024 MB',
       timeout: '180 seconds',
       environment: lambdaEnv,
-      link: [...sharedLink, lessonTextQ.main],
+      link: [...sharedLink, lessonTextQ.main, audioNarrationQ.main],
     })
     lessonTextQ.main.subscribe(lessonText.arn, {
       transform: { eventSourceMapping: withConcurrency },
@@ -214,6 +218,24 @@ export default $config({
       link: [...sharedLink, imageGenQ.main],
     })
     imageGenQ.main.subscribe(imageGenerator.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
+
+    // ─── Lambda: audio-narration ──────────────────────────────────────────
+    const audioNarration = new sst.aws.Function('AudioNarrator', {
+      handler: 'lambdas/audio-narration/index.handler',
+      memory: '1024 MB',
+      timeout: '180 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, audioNarrationQ.main],
+      permissions: [
+        {
+          actions: ['polly:SynthesizeSpeech'],
+          resources: ['*'],
+        },
+      ],
+    })
+    audioNarrationQ.main.subscribe(audioNarration.arn, {
       transform: { eventSourceMapping: withConcurrency },
     })
 
@@ -241,6 +263,7 @@ export default $config({
       GraphRecalcQueueUrl: graphRecalcQ.main.url,
       LessonTextQueueUrl: lessonTextQ.main.url,
       ImageGenQueueUrl: imageGenQ.main.url,
+      AudioNarrationQueueUrl: audioNarrationQ.main.url,
     }
   },
 })

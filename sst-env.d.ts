@@ -10,6 +10,18 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "AudioNarrationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AudioNarrationQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AudioNarrator": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "ArtifactsBucket": {
       "name": string
       "type": "sst.aws.Bucket"
