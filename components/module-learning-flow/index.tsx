@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { FIRST_LESSON_NARRATION, SECOND_LESSON_NARRATION, VOICE_OPTIONS } from './constants'
+import { FIRST_LESSON_NARRATION, SECOND_LESSON_NARRATION } from './constants'
 import { DoneScreen } from './done-screen'
 import { ContentScreen } from './content-screen'
 import { IntroScreen } from './intro-screen'
@@ -10,6 +10,7 @@ import { QuizScreen } from './quiz-screen'
 import { TimelineScreen } from './timeline-screen'
 import { buildSteps } from './steps'
 import type { ModuleLearningFlowProps, Step } from './types'
+import { useNarrationAudio } from './use-narration-audio'
 
 export default function ModuleLearningFlow({
   subject,
@@ -21,7 +22,6 @@ export default function ModuleLearningFlow({
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [selections, setSelections] = useState<Record<number, number>>({})
-  const [voiceIndex] = useState(0)
 
   const step = steps[currentStep]
   const isFirstLessonAnimatedSlide =
@@ -34,18 +34,30 @@ export default function ModuleLearningFlow({
       ? SECOND_LESSON_NARRATION
       : undefined
 
+  const narrationState = useNarrationAudio({ narration: lessonNarration })
+
   const isProgressStep = (kind: Step['kind']) =>
     kind === 'content' || kind === 'quiz' || kind === 'timeline'
 
-  const totalProgressSteps = steps.filter((item) => isProgressStep(item.kind)).length
-  const completedProgressSteps = steps
-    .slice(0, currentStep + 1)
-    .filter((item) => isProgressStep(item.kind)).length
+  const isCurrentProgressStep = isProgressStep(step.kind)
+  const isNarratedContent = step.kind === 'content' && Boolean(lessonNarration)
+  const audioFraction =
+    narrationState.audioDuration > 0
+      ? Math.min(1, narrationState.currentTime / narrationState.audioDuration)
+      : 0
 
-  const progressPercent =
-    step.kind === 'intro' || step.kind === 'done'
-      ? 0
-      : (completedProgressSteps / totalProgressSteps) * 100
+  // Bar reflects this step's own progress, edge-to-edge:
+  // - narrated content steps fill with the audio playback (0 → 100%)
+  // - other progress steps stay full (you've already passed through them)
+  const progressPercent = !isCurrentProgressStep
+    ? 0
+    : isNarratedContent
+      ? audioFraction * 100
+      : 100
+
+  // Disable the CSS width transition while audio is actively driving updates at
+  // 60fps (rAF). Otherwise the bar visibly chases the target with a 700ms lag.
+  const isProgressBarSmooth = !(isNarratedContent && narrationState.playState === 'playing')
 
   const showHeader = isProgressStep(step.kind)
 
@@ -70,7 +82,24 @@ export default function ModuleLearningFlow({
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8] text-black">
-      {showHeader && <FlowHeader title={subject.name} percent={progressPercent} />}
+      <audio
+        ref={narrationState.audioRef}
+        src={narrationState.audioSrc}
+        preload="auto"
+        className="hidden"
+      />
+      {showHeader && (
+        <FlowHeader
+          title={subject.name}
+          percent={progressPercent}
+          smooth={isProgressBarSmooth}
+          onSeek={
+            isNarratedContent
+              ? (fraction) => narrationState.seek(fraction * narrationState.audioDuration)
+              : undefined
+          }
+        />
+      )}
 
       <div
         key={currentStep}
@@ -82,10 +111,9 @@ export default function ModuleLearningFlow({
         {step.kind === 'content' && (
           <ContentScreen
             step={step}
-            voice={VOICE_OPTIONS[voiceIndex]}
             onBack={goPrev}
             onNext={goNext}
-            narration={lessonNarration}
+            narrationState={narrationState}
           />
         )}
         {step.kind === 'timeline' && (

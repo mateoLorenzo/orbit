@@ -1,12 +1,6 @@
 import type { LessonNarration } from './types'
 
 export const ORANGE = '#ff4f00'
-export const VOICE_OPTIONS = [
-  'Narración IA',
-  'Narración IA',
-  'Narración IA',
-  'Narración IA',
-]
 
 export const FIRST_LESSON_NARRATION: LessonNarration = {
   audioSrc: '/audio/lesson-1.mp3',

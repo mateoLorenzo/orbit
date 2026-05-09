@@ -121,6 +121,16 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
     void audio.play().catch(() => setPlayState('paused'))
   }
 
+  const seek = (seconds: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+    const duration = audio.duration
+    if (!Number.isFinite(duration) || duration <= 0) return
+    const clamped = Math.max(0, Math.min(seconds, duration))
+    audio.currentTime = clamped
+    setCurrentTime(clamped)
+  }
+
   // Build a per-word schedule by spreading each line's words across its window
   // [line.startSeconds, nextLineStart], proportionally to character count.
   const wordSchedule = useMemo<ScheduledWord[][][]>(() => {
@@ -178,15 +188,34 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
     )
   }
 
+  // Last paragraph whose first line has already started — used by the immersive
+  // overlay so the visible paragraph follows the audio.
+  const getActiveParagraphIndex = (): number => {
+    if (!narration) return 0
+    let idx = 0
+    for (let p = 0; p < narration.lines.length; p++) {
+      const firstLineStart = narration.lines[p][0]?.startSeconds ?? Number.POSITIVE_INFINITY
+      if (currentTime >= firstLineStart) idx = p
+      else break
+    }
+    return idx
+  }
+
   return {
+    audioDuration,
     audioRef,
     audioSrc: narration?.audioSrc,
+    currentTime,
+    getActiveParagraphIndex,
     getNarratedParagraph,
     isGenerating,
     lines: narration?.lines ?? [],
     playState,
     restartPlayback,
+    seek,
     subtitleEnabled,
     togglePlayback,
   }
 }
+
+export type NarrationState = ReturnType<typeof useNarrationAudio>
