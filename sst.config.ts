@@ -97,6 +97,9 @@ export default $config({
     const lessonTextQ = makeQueueWithDlq('LessonTextGenerationQueue', {
       visibilityTimeout: '180 seconds',
     })
+    const imageGenQ = makeQueueWithDlq('ImageGenerationQueue', {
+      visibilityTimeout: '120 seconds',
+    })
 
     // ─── Lambda env shared by all processors ─────────────────────────────
     const lambdaEnv = {
@@ -111,6 +114,7 @@ export default $config({
       EMBEDDING_QUEUE_URL: embeddingQ.main.url,
       GRAPH_RECALC_QUEUE_URL: graphRecalcQ.main.url,
       LESSON_TEXT_QUEUE_URL: lessonTextQ.main.url,
+      IMAGE_GEN_QUEUE_URL: imageGenQ.main.url,
     }
 
     const sharedLink = [
@@ -185,7 +189,7 @@ export default $config({
       memory: '1024 MB',
       timeout: '300 seconds',
       environment: lambdaEnv,
-      link: [...sharedLink, graphRecalcQ.main, lessonTextQ.main],
+      link: [...sharedLink, graphRecalcQ.main, lessonTextQ.main, imageGenQ.main],
     })
     graphRecalcQ.main.subscribe(graphRecalc.arn)
 
@@ -198,6 +202,18 @@ export default $config({
       link: [...sharedLink, lessonTextQ.main],
     })
     lessonTextQ.main.subscribe(lessonText.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
+
+    // ─── Lambda: image-generator ──────────────────────────────────────────
+    const imageGenerator = new sst.aws.Function('ImageGenerator', {
+      handler: 'lambdas/image-generator/index.handler',
+      memory: '1024 MB',
+      timeout: '120 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, imageGenQ.main],
+    })
+    imageGenQ.main.subscribe(imageGenerator.arn, {
       transform: { eventSourceMapping: withConcurrency },
     })
 
@@ -224,6 +240,7 @@ export default $config({
       EmbeddingQueueUrl: embeddingQ.main.url,
       GraphRecalcQueueUrl: graphRecalcQ.main.url,
       LessonTextQueueUrl: lessonTextQ.main.url,
+      ImageGenQueueUrl: imageGenQ.main.url,
     }
   },
 })

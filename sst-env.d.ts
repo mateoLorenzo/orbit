@@ -66,6 +66,26 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "ImageGenQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ImageGenerationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ImageGenerator": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "ImageQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ImageQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
     "LessonTextGenerationQueue": {
       "type": "sst.aws.Queue"
       "url": string
@@ -77,14 +97,6 @@ declare module "sst" {
     "LessonTextGenerator": {
       "name": string
       "type": "sst.aws.Function"
-    }
-    "ImageQueue": {
-      "type": "sst.aws.Queue"
-      "url": string
-    }
-    "ImageQueueDlq": {
-      "type": "sst.aws.Queue"
-      "url": string
     }
     "OriginalsBucket": {
       "name": string
