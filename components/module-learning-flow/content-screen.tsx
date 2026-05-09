@@ -2,25 +2,36 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Pause, Play, RotateCcw } from 'lucide-react'
-import { IconButton, PrimaryButton, SecondaryButton } from './primitives'
-import type { ContentStep, LessonNarration } from './types'
-import { useNarrationAudio, type NarratedWord } from './use-narration-audio'
+import { Pause, Play } from 'lucide-react'
+import { PrimaryButton, SecondaryButton } from './primitives'
+import type { ContentStep } from './types'
+import type { NarratedWord, NarrationState } from './use-narration-audio'
 
 interface ContentScreenProps {
   step: ContentStep
-  voice: string
   onBack: () => void
   onNext: () => void
-  narration?: LessonNarration
+  narrationState: NarrationState
 }
 
-function NarratedParagraph({ wordsByLine }: { wordsByLine: NarratedWord[][] }) {
+function NarratedParagraph({
+  wordsByLine,
+  className = 'leading-[1.25] tracking-[-0.5px]',
+  revealedClass = 'text-black',
+  hiddenClass = 'text-black/24',
+  ariaHidden,
+}: {
+  wordsByLine: NarratedWord[][]
+  className?: string
+  revealedClass?: string
+  hiddenClass?: string
+  ariaHidden?: boolean
+}) {
   const fullText = wordsByLine
     .map((line) => line.map((word) => word.text).join(' '))
     .join(' ')
   return (
-    <p className="leading-[1.25] tracking-[-0.5px]">
+    <p className={className} aria-hidden={ariaHidden}>
       <span className="sr-only">{fullText}</span>
       <span aria-hidden>
         {wordsByLine.map((line, lineIdx) => (
@@ -29,7 +40,7 @@ function NarratedParagraph({ wordsByLine }: { wordsByLine: NarratedWord[][] }) {
               <span
                 key={wordIdx}
                 className={`transition-colors duration-200 ${
-                  word.revealed ? 'text-black' : 'text-black/24'
+                  word.revealed ? revealedClass : hiddenClass
                 }`}
               >
                 {word.text}
@@ -41,92 +52,6 @@ function NarratedParagraph({ wordsByLine }: { wordsByLine: NarratedWord[][] }) {
         ))}
       </span>
     </p>
-  )
-}
-
-function AiSpeakingAvatar({ isPlaying }: { isPlaying: boolean }) {
-  return (
-    <div
-      className={`ai-speaking-avatar ${isPlaying ? 'ai-speaking-avatar--active' : ''}`}
-      aria-hidden
-    >
-      <span className="ai-speaking-wave ai-speaking-wave--outer" />
-      <span className="ai-speaking-wave ai-speaking-wave--inner" />
-      <span className="ai-speaking-core">
-        <span className="flex h-4 items-end gap-0.5">
-          {[0, 1, 2, 3].map((bar) => (
-            <span
-              key={bar}
-              className="ai-speaking-bar"
-              style={{ animationDelay: `${bar * 120}ms` }}
-            />
-          ))}
-        </span>
-      </span>
-    </div>
-  )
-}
-
-function VoicePanel({
-  voice,
-  subtitleEnabled,
-  isGenerating,
-  playState,
-  onTogglePlayback,
-  onRestartPlayback,
-}: {
-  voice: string
-  subtitleEnabled: boolean
-  isGenerating: boolean
-  playState: 'playing' | 'paused' | 'stopped'
-  onTogglePlayback: () => void
-  onRestartPlayback: () => void
-}) {
-  return (
-    <div className="border-t border-black/4 p-6">
-      <div className="flex items-center gap-3 rounded-xl bg-[#f8f8f8] p-4">
-        <AiSpeakingAvatar isPlaying={playState === 'playing'} />
-        <div className="min-w-0 flex-1">
-          <p className="text-base font-medium leading-none tracking-[-0.5px] text-black/40">
-            {subtitleEnabled && isGenerating ? 'Generando narración…' : 'Voz elegida'}
-          </p>
-          <p className="mt-1 truncate text-base font-medium leading-none tracking-[-0.5px] text-black">
-            {voice}
-          </p>
-        </div>
-
-        {subtitleEnabled ? (
-          <>
-            <IconButton
-              onClick={onTogglePlayback}
-              label={
-                isGenerating
-                  ? 'Generando narración'
-                  : playState === 'playing'
-                    ? 'Pausar audio'
-                    : playState === 'paused'
-                      ? 'Continuar audio'
-                      : 'Reproducir audio'
-              }
-              icon={
-                isGenerating ? (
-                  <div className="size-4 animate-spin rounded-full border-2 border-black/20 border-t-black" />
-                ) : playState === 'playing' ? (
-                  <Pause className="size-4" strokeWidth={2} />
-                ) : (
-                  <Play className="size-4" strokeWidth={2} />
-                )
-              }
-            />
-            <IconButton
-              onClick={onRestartPlayback}
-              label="Reiniciar audio"
-              icon={<RotateCcw className="size-4" strokeWidth={2} />}
-            />
-          </>
-        ) : null}
-      </div>
-    </div>
   )
 }
 
@@ -177,31 +102,32 @@ function ContentText({
 
 export function ContentScreen({
   step,
-  voice,
   onBack,
   onNext,
-  narration,
+  narrationState,
 }: ContentScreenProps) {
   const [isImmersive, setIsImmersive] = useState(false)
   const {
-    audioRef,
-    audioSrc,
+    getActiveParagraphIndex,
     getNarratedParagraph,
     isGenerating,
     lines,
     playState,
-    restartPlayback,
     subtitleEnabled,
     togglePlayback,
-  } = useNarrationAudio({ narration })
+  } = narrationState
+
+  const overlayParagraphIndex = subtitleEnabled ? getActiveParagraphIndex() : 0
+  const overlayWords = subtitleEnabled ? getNarratedParagraph(overlayParagraphIndex) : null
+  const narrationOffset = step.paragraphs.length - lines.length
+  const overlayFallbackText =
+    step.paragraphs[narrationOffset + overlayParagraphIndex] ?? step.paragraphs[0] ?? ''
 
   return (
     <div
       className={`flex min-h-0 flex-1 flex-col transition-[gap,padding] duration-500 ${isImmersive ? 'gap-0 p-0' : 'gap-6 px-6 py-6'
         }`}
     >
-      <audio ref={audioRef} src={audioSrc} preload="auto" className="hidden" />
-
       <div
         className={`flex min-h-0 flex-1 flex-col lg:flex-row transition-[gap] duration-500 ${isImmersive ? 'gap-0' : 'gap-6'
           }`}
@@ -218,14 +144,6 @@ export function ContentScreen({
             narratedParagraphCount={lines.length}
             subtitleEnabled={subtitleEnabled}
             getNarratedParagraph={getNarratedParagraph}
-          />
-          <VoicePanel
-            voice={voice}
-            subtitleEnabled={subtitleEnabled}
-            isGenerating={isGenerating}
-            playState={playState}
-            onTogglePlayback={togglePlayback}
-            onRestartPlayback={restartPlayback}
           />
         </div>
 
@@ -269,14 +187,53 @@ export function ContentScreen({
             aria-hidden={!isImmersive}
           />
 
-          <p
-            className={`pointer-events-none absolute bottom-12 left-1/2 max-w-3xl -translate-x-1/2 px-12 text-center text-[28px] font-medium leading-snug tracking-[-0.5px] text-white transition-opacity duration-500 ${
-              isImmersive ? 'opacity-100' : 'opacity-0'
-            }`}
-            aria-hidden={!isImmersive}
-          >
-            {step.paragraphs[0]}
-          </p>
+          {overlayWords && overlayWords.length > 0 ? (
+            <NarratedParagraph
+              key={overlayParagraphIndex}
+              wordsByLine={overlayWords}
+              className={`pointer-events-none absolute bottom-12 left-1/2 max-w-3xl -translate-x-1/2 px-12 text-center text-[28px] font-medium leading-snug tracking-[-0.5px] transition-opacity duration-500 ${
+                isImmersive ? 'opacity-100' : 'opacity-0'
+              }`}
+              revealedClass="text-white"
+              hiddenClass="text-white/40"
+              ariaHidden={!isImmersive}
+            />
+          ) : (
+            <p
+              className={`pointer-events-none absolute bottom-12 left-1/2 max-w-3xl -translate-x-1/2 px-12 text-center text-[28px] font-medium leading-snug tracking-[-0.5px] text-white transition-opacity duration-500 ${
+                isImmersive ? 'opacity-100' : 'opacity-0'
+              }`}
+              aria-hidden={!isImmersive}
+            >
+              {overlayFallbackText}
+            </p>
+          )}
+
+          {subtitleEnabled ? (
+            <button
+              type="button"
+              onClick={togglePlayback}
+              disabled={isGenerating}
+              aria-label={
+                isGenerating
+                  ? 'Generando narración'
+                  : playState === 'playing'
+                    ? 'Pausar audio'
+                    : playState === 'paused'
+                      ? 'Continuar audio'
+                      : 'Reproducir audio'
+              }
+              className="absolute bottom-4 left-4 z-10 inline-flex size-10 items-center justify-center rounded-lg border border-black/12 bg-white text-black transition-colors hover:bg-neutral-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isGenerating ? (
+                <div className="size-4 animate-spin rounded-full border-2 border-black/20 border-t-black" />
+              ) : playState === 'playing' ? (
+                <Pause className="size-4" strokeWidth={2} />
+              ) : (
+                <Play className="size-4" strokeWidth={2} />
+              )}
+            </button>
+          ) : null}
 
           <button
             type="button"
