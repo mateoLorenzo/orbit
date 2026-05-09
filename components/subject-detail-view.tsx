@@ -160,16 +160,11 @@ function CompletedLessonCard({ index, node }: Omit<LessonCardProps, 'onStart'>) 
 
 function ActiveLessonCard({ index, node, onStart }: LessonCardProps) {
   return (
-    <article className="relative flex h-[431px] min-w-0 flex-col gap-4 overflow-hidden rounded-xl bg-black p-5 text-white">
+    <article className="group relative flex h-[431px] min-w-0 flex-col gap-4 overflow-hidden rounded-xl bg-black p-5 text-white">
       <div
         aria-hidden
-        className="pointer-events-none absolute size-[478px] rounded-full bg-[#ea580c]"
-        style={{
-          left: '50%',
-          top: '272px',
-          transform: 'translateX(-50%)',
-          filter: 'blur(126.8px)',
-        }}
+        className="pointer-events-none absolute left-1/2 top-[272px] size-[478px] -translate-x-1/2 rounded-full bg-[#ea580c] transition-[top] duration-300 ease-out group-hover:top-[252px]"
+        style={{ filter: 'blur(126.8px)' }}
       />
       <div className="relative flex size-12 shrink-0 items-center justify-center rounded-lg bg-white text-2xl font-medium leading-none tracking-[-0.5px] text-black">
         {index + 1}
