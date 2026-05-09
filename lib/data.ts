@@ -6,7 +6,7 @@ export const initialSubjects: Subject[] = [
     name: 'Matemáticas Avanzadas',
     description: 'Cálculo diferencial e integral',
     color: 'from-emerald-500 to-teal-600',
-    icon: '📐',
+    icon: 'ruler',
     createdAt: new Date('2024-01-15'),
     sources: [
       {
@@ -104,7 +104,7 @@ export const initialSubjects: Subject[] = [
     name: 'Física Cuántica',
     description: 'Introducción a la mecánica cuántica',
     color: 'from-violet-500 to-purple-600',
-    icon: '⚛️',
+    icon: 'atom',
     createdAt: new Date('2024-02-01'),
     sources: [
       {
@@ -142,7 +142,7 @@ export const initialSubjects: Subject[] = [
     name: 'Programación',
     description: 'Estructuras de datos y algoritmos',
     color: 'from-blue-500 to-cyan-600',
-    icon: '💻',
+    icon: 'laptop',
     createdAt: new Date('2024-02-10'),
     sources: [],
     content: []
@@ -152,7 +152,7 @@ export const initialSubjects: Subject[] = [
     name: 'Historia del Arte',
     description: 'Del Renacimiento al Arte Moderno',
     color: 'from-amber-500 to-orange-600',
-    icon: '🎨',
+    icon: 'palette',
     createdAt: new Date('2024-02-15'),
     sources: [
       {
@@ -212,4 +212,4 @@ export const subjectColors = [
   'from-indigo-500 to-blue-600'
 ]
 
-export const subjectIcons = ['📚', '📐', '⚛️', '💻', '🎨', '🔬', '📖', '🧮', '🌍', '🎵']
+export { subjectIcons } from './subject-icons'

@@ -5,6 +5,7 @@ import { useApp } from '@/lib/app-context'
 import type { Subject, ContentNode, Source } from '@/lib/types'
 import { ArrowDownToLine, ArrowLeft, ArrowRight, Plus } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
+import ModuleLearningFlow from '@/components/module-learning-flow'
 
 interface SubjectDetailProps {
   subject: Subject
@@ -160,6 +161,7 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
 export default function SubjectDetail({ subject, onBack }: SubjectDetailProps) {
   const { generateContent, addSource } = useApp()
   const [activeTab, setActiveTab] = useState<TabType>('clases')
+  const [activeModule, setActiveModule] = useState<ContentNode | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const progress = useMemo(() => getSubjectProgress(subject), [subject])
@@ -189,6 +191,23 @@ export default function SubjectDetail({ subject, onBack }: SubjectDetailProps) {
 
   const onDownloadSource = (_: Source) => {
     /* Stubbed — wire to presigned-url download once API is ready */
+  }
+
+  if (activeModule) {
+    const currentIndex = classes.findIndex((c) => c.id === activeModule.id)
+    const nextNode = currentIndex >= 0 ? classes[currentIndex + 1] : undefined
+    return (
+      <ModuleLearningFlow
+        subject={subject}
+        node={activeModule}
+        onExit={() => setActiveModule(null)}
+        onContinueNext={
+          nextNode
+            ? () => setActiveModule(nextNode)
+            : undefined
+        }
+      />
+    )
   }
 
   return (
@@ -292,9 +311,7 @@ export default function SubjectDetail({ subject, onBack }: SubjectDetailProps) {
                     key={node.id}
                     node={node}
                     onGenerate={() => generateContent(subject.id)}
-                    onViewDetail={() => {
-                      /* Navigation to per-class detail not implemented yet */
-                    }}
+                    onViewDetail={() => setActiveModule(node)}
                   />
                 ))}
               </div>

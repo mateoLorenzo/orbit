@@ -1,6 +1,7 @@
 'use client'
 
 import type { Subject } from '@/lib/types'
+import { SubjectIcon } from '@/lib/subject-icons'
 
 interface SubjectCardProps {
   subject: Subject
@@ -15,8 +16,8 @@ function SubjectCard({ subject, progress, onClick }: SubjectCardProps) {
       onClick={onClick}
       className="group flex h-[187px] w-full flex-col items-start gap-4 overflow-hidden rounded-xl bg-white p-6 text-left transition-shadow hover:shadow-md"
     >
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black text-2xl leading-none">
-        <span aria-hidden>{subject.icon}</span>
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black text-white">
+        <SubjectIcon name={subject.icon} className="size-6" />
       </div>
 
       <div className="w-full">

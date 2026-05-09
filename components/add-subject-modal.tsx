@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useApp } from '@/lib/app-context'
-import { subjectIcons } from '@/lib/data'
+import { subjectIcons, SubjectIcon } from '@/lib/subject-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X } from 'lucide-react'
@@ -68,13 +68,13 @@ export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProp
                   key={icon}
                   type="button"
                   onClick={() => setSelectedIcon(icon)}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-all ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
                     selectedIcon === icon
-                      ? 'bg-primary/20 ring-2 ring-primary'
-                      : 'bg-secondary hover:bg-secondary/80'
+                      ? 'bg-primary/20 text-primary ring-2 ring-primary'
+                      : 'bg-secondary text-foreground hover:bg-secondary/80'
                   }`}
                 >
-                  {icon}
+                  <SubjectIcon name={icon} className="size-5" />
                 </button>
               ))}
             </div>
