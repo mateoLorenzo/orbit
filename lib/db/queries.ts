@@ -170,3 +170,138 @@ export async function updateProfile(input: {
     .returning()
   return row
 }
+
+// --- Nodes with progress ---
+
+export async function listNodesWithProgress(subjectId: string) {
+  const rows = await db
+    .select({
+      id: schema.nodes.id,
+      pathId: schema.nodes.pathId,
+      title: schema.nodes.title,
+      contentBrief: schema.nodes.contentBrief,
+      progressStatus: schema.progress.status,
+    })
+    .from(schema.nodes)
+    .innerJoin(schema.paths, eq(schema.paths.id, schema.nodes.pathId))
+    .leftJoin(
+      schema.progress,
+      and(
+        eq(schema.progress.nodeId, schema.nodes.id),
+        eq(schema.progress.userId, CURRENT_USER_ID),
+      ),
+    )
+    .where(eq(schema.nodes.subjectId, subjectId))
+    .orderBy(schema.paths.orderIndex, schema.nodes.createdAt)
+
+  return rows.map((r) => ({
+    ...r,
+    progressStatus: r.progressStatus ?? ('available' as const),
+  }))
+}
+
+export interface NodeAssets {
+  status: 'partial' | 'ready'
+  lesson: { paragraphs: string[]; quiz: Array<{ question: string; options: string[] }> } | null
+  image: { url: string } | null
+  audio: { url: string; durationSec: number } | null
+  podcast: { url: string; durationSec: number } | null
+  video: { url: string; durationSec: number } | null
+}
+
+export async function getNodeAssets(nodeId: string): Promise<NodeAssets> {
+  const rows = await db
+    .select()
+    .from(schema.nodeContent)
+    .where(eq(schema.nodeContent.nodeId, nodeId))
+
+  const byType = new Map(rows.filter((r) => r.status === 'ready').map((r) => [r.contentType, r]))
+
+  const lessonRow = byType.get('lesson_text')
+  const meta = (lessonRow?.generationMetadata as any) ?? null
+  const lesson = meta
+    ? {
+        paragraphs: meta.paragraphs ?? [],
+        quiz: (meta.quiz ?? []).map((q: any) => ({
+          question: q.question,
+          options: q.options,
+          // correctIndex stripped on purpose
+        })),
+      }
+    : null
+
+  const fromUrl = (k: string) => {
+    const r = byType.get(k)
+    return r?.contentUrl
+      ? { url: r.contentUrl, durationSec: (r.generationMetadata as any)?.durationSec ?? 0 }
+      : null
+  }
+
+  const imageRow = byType.get('image')
+  const image = imageRow?.contentUrl ? { url: imageRow.contentUrl } : null
+  const audio = fromUrl('audio')
+  const podcast = fromUrl('podcast')
+  const video = fromUrl('video')
+
+  // ready when lesson + image + audio all present (video/podcast optional for now)
+  const status: 'partial' | 'ready' = lesson && image && audio ? 'ready' : 'partial'
+  return { status, lesson, image, audio, podcast, video }
+}
+
+export async function gradeQuiz(nodeId: string, answers: number[]) {
+  const [lessonRow] = await db
+    .select()
+    .from(schema.nodeContent)
+    .where(and(eq(schema.nodeContent.nodeId, nodeId), eq(schema.nodeContent.contentType, 'lesson_text')))
+    .limit(1)
+
+  if (!lessonRow) throw new Error('lesson not generated yet')
+  const quiz = (lessonRow.generationMetadata as any)?.quiz as Array<{ correctIndex: number }> | undefined
+  if (!quiz || quiz.length === 0) throw new Error('no quiz in lesson metadata')
+
+  const perQuestion = quiz.map((q, i) => ({
+    correct: q.correctIndex,
+    selected: answers[i] ?? -1,
+  }))
+  const correct = perQuestion.filter((p) => p.correct === p.selected).length
+  const total = quiz.length
+  const passed = correct / total >= 0.66
+
+  if (passed) {
+    await upsertNodeProgress(nodeId, 'mastered')
+  }
+
+  return { passed, score: { correct, total }, perQuestion }
+}
+
+export async function deleteFile(subjectId: string, fileId: string) {
+  const [row] = await db
+    .select()
+    .from(schema.files)
+    .where(
+      and(
+        eq(schema.files.id, fileId),
+        eq(schema.files.subjectId, subjectId),
+        eq(schema.files.userId, CURRENT_USER_ID),
+      ),
+    )
+    .limit(1)
+  if (!row) return null
+  await db.delete(schema.files).where(eq(schema.files.id, fileId))
+  return row // caller uses row.s3Key to delete from S3
+}
+
+export async function getStats() {
+  const subjects = await listSubjects()
+  let mastered = 0
+  for (const s of subjects) {
+    const summary = await summarizeProgressForSubject(s.id)
+    if (summary.total > 0 && summary.percentMastered === 100) mastered += 1
+  }
+  return {
+    streakDays: 24, // hardcoded MVP
+    subjectsCompleted: mastered,
+    totalSubjects: subjects.length,
+    formatUsage: { text: 100 } as Record<string, number>,
+  }
+}
