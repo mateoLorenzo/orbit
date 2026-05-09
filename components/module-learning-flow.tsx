@@ -93,21 +93,6 @@ function buildSteps(node: ContentNode): Step[] {
   ]
 }
 
-function FakeBrowserBar() {
-  return (
-    <div className="flex h-[53px] w-full items-center gap-3 border-b border-black/8 bg-white px-4">
-      <div className="flex items-center gap-2">
-        <span className="size-3 rounded-full bg-[#ff5f57]" aria-hidden />
-        <span className="size-3 rounded-full bg-[#febc2e]" aria-hidden />
-        <span className="size-3 rounded-full bg-[#28c840]" aria-hidden />
-      </div>
-      <div className="mx-auto flex h-7 min-w-[280px] max-w-[640px] flex-1 items-center justify-center rounded-md bg-black/5 px-3 text-[13px] tracking-[-0.052px] text-[#4c4c4c]">
-        platform.io
-      </div>
-      <div className="w-[88px]" aria-hidden />
-    </div>
-  )
-}
 
 function ProgressBar({ percent }: { percent: number }) {
   return (
@@ -123,7 +108,7 @@ function ProgressBar({ percent }: { percent: number }) {
 function FlowHeader({ title, percent }: { title: string; percent: number }) {
   return (
     <div className="sticky top-0 z-10 bg-[#f8f8f8]">
-      <div className="flex items-center justify-center px-6 py-6">
+      <div className="flex items-center justify-center px-6 py-3">
         <p className="text-base font-medium tracking-[-0.5px] text-black">{title}</p>
       </div>
       <ProgressBar percent={percent} />
@@ -419,7 +404,6 @@ export default function ModuleLearningFlow({
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f8f8f8] text-black">
-      <FakeBrowserBar />
       {showHeader && <FlowHeader title={subject.name} percent={progressPercent} />}
 
       <div key={currentStep} className={`flex flex-1 flex-col ${enterAnimation}`}>
