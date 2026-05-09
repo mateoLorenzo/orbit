@@ -2,21 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, type Variants } from 'motion/react'
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
-
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const STAGGER_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-}
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5, ease: EASE } },
-}
 
 interface RoadmapNode {
   id: string
@@ -117,40 +104,41 @@ export default function OnboardingRoadmapPage() {
       className="flex flex-1 flex-col overflow-hidden"
     >
       <div className="flex flex-1 flex-col overflow-hidden">
-        <motion.div
-          variants={STAGGER_CONTAINER}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col"
-        >
-          <motion.div
-            variants={FADE_CHILD}
-            className="mx-auto w-full max-w-3xl shrink-0 px-6 pt-8 text-center"
-          >
+        <div className="flex flex-col">
+          <div className="mx-auto w-full max-w-3xl shrink-0 px-6 pt-8 text-center">
             <h1 className="text-[36px] font-semibold leading-[1.1] tracking-[-0.8px]">
-              <span className="block text-[#FF5C00]">Proceso completado</span>
-              <span className="block text-black">Tu ruta de aprendizaje</span>
+              <span className="block text-[#FF5C00] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
+                Proceso completado
+              </span>
+              <span className="block text-black animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+                Tu ruta de aprendizaje
+              </span>
             </h1>
-            <p className="mt-2 text-sm text-black/45">
+            <p className="mt-2 text-sm text-black/45 animate-in fade-in duration-700 delay-500 fill-mode-backwards">
               Revisa tu camino y realiza los cambios que desees.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div variants={FADE_CHILD} className="mt-6 shrink-0">
+          <div className="mt-6 shrink-0">
             <div
               ref={scrollerRef}
               className="mx-auto flex w-full max-w-[1280px] snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-6 pb-2 [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none' }}
             >
               {NODES.map((node, i) => (
-                <RoadmapCard key={node.id} index={i + 1} node={node} />
+                <RoadmapCard
+                  key={node.id}
+                  index={i + 1}
+                  node={node}
+                  entryDelay={i * 70 + 600}
+                />
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={FADE_CHILD}
-            className="mt-4 flex shrink-0 items-center justify-center gap-3"
+          <div
+            style={{ animationDelay: '1050ms' }}
+            className="mt-4 flex shrink-0 items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-700 fill-mode-backwards"
           >
             <ArrowButton
               dir="left"
@@ -162,14 +150,12 @@ export default function OnboardingRoadmapPage() {
               onClick={() => scrollByCard(1)}
               disabled={!canScrollRight}
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
-          className="mx-auto mt-auto flex w-full shrink-0 items-center justify-center px-6 pb-6 pt-6"
+        <footer
+          style={{ animationDelay: '1150ms' }}
+          className="mx-auto mt-auto flex w-full shrink-0 items-center justify-center px-6 pb-6 pt-6 animate-in fade-in slide-in-from-bottom-2 duration-700 fill-mode-backwards"
         >
           <button
             type="button"
@@ -178,7 +164,7 @@ export default function OnboardingRoadmapPage() {
           >
             Confirmar ruta de aprendizaje
           </button>
-        </motion.footer>
+        </footer>
       </div>
     </PageTransition>
   )
@@ -210,12 +196,17 @@ function ArrowButton({
 function RoadmapCard({
   index,
   node,
+  entryDelay,
 }: {
   index: number
   node: RoadmapNode
+  entryDelay: number
 }) {
   return (
-    <article className="flex h-[320px] w-[268px] shrink-0 snap-start flex-col rounded-2xl border border-black/8 bg-white p-4">
+    <article
+      style={{ animationDelay: `${entryDelay}ms` }}
+      className="flex h-[320px] w-[268px] shrink-0 snap-start flex-col rounded-2xl border border-black/8 bg-white p-4 animate-in fade-in slide-in-from-bottom-2 duration-700 fill-mode-backwards"
+    >
       <div className="flex size-8 items-center justify-center rounded-md border border-black/12 text-base font-semibold tracking-[-0.32px] text-black">
         {index}
       </div>
