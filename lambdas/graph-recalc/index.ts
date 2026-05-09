@@ -1,8 +1,12 @@
 import type { SQSEvent, SQSHandler } from 'aws-lambda'
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs'
 import { eq, and, inArray, or } from 'drizzle-orm'
+import { Resource } from 'sst'
 import { getDb, schema } from '../_shared/db'
 import { embed } from '../_shared/voyage'
 import { summarizeFile, synthesizeGraph } from './synth'
+
+const sqs = new SQSClient({})
 
 interface RecalcPayload {
   subjectId: string
@@ -229,6 +233,28 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       }
     }
 
+    // Fan out lesson-text generation for new + updated nodes.
+    const nodesToGenerate: string[] = []
+    for (const [key] of synthByTitle) {
+      const id = titleToId.get(key)
+      if (!id) continue
+      const wasUpdated = nodesNeedingEmbedding.some((n) => n.id === id)
+      const hasReady = await hasReadyLesson(db, id)
+      if (wasUpdated || !hasReady) {
+        nodesToGenerate.push(id)
+      }
+    }
+
+    for (const nodeId of nodesToGenerate) {
+      await sqs.send(
+        new SendMessageCommand({
+          QueueUrl: Resource.LessonTextGenerationQueue.url,
+          MessageBody: JSON.stringify({ nodeId, subjectId }),
+        }),
+      )
+    }
+    console.log('graph-recalc: fan-out lesson-text', { subjectId, count: nodesToGenerate.length })
+
     console.log('graph-recalc: done', {
       subjectId,
       synthNodes: synth.nodes.length,
@@ -238,4 +264,21 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       edges: edgesToInsert.length,
     })
   }
+}
+
+async function hasReadyLesson(
+  db: ReturnType<typeof getDb>,
+  nodeId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ status: schema.nodeContent.status })
+    .from(schema.nodeContent)
+    .where(
+      and(
+        eq(schema.nodeContent.nodeId, nodeId),
+        eq(schema.nodeContent.contentType, 'lesson_text'),
+      ),
+    )
+    .limit(1)
+  return row?.status === 'ready'
 }
