@@ -1,6 +1,12 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { resetStore } from '../store'
-import { GET as getProfile, PATCH as patchProfile } from '@/app/api/profile/route'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/lib/db/queries', () => ({
+  getProfile: vi.fn(),
+  updateProfile: vi.fn(),
+}))
+
+import { GET, PATCH } from '@/app/api/profile/route'
+import * as queries from '@/lib/db/queries'
 
 function jsonRequest(method: string, body?: unknown): Request {
   return new Request('http://test/local', {
@@ -10,35 +16,47 @@ function jsonRequest(method: string, body?: unknown): Request {
   })
 }
 
-describe('Profile routes', () => {
-  beforeEach(() => resetStore())
+const seed = {
+  userId: 'demo',
+  formatoPreferido: 'texto',
+  horariosActivos: [],
+  erroresRecurrentes: [],
+  friccionPromedio: 50,
+  updatedAt: new Date().toISOString(),
+}
 
-  it('GET /profile returns the singleton', async () => {
-    const res = await getProfile(jsonRequest('GET'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.id).toBe('singleton')
-    expect(body.formatoPreferido).toBe('texto')
+describe('Profile routes (Drizzle)', () => {
+  beforeEach(() => {
+    vi.mocked(queries.getProfile).mockReset()
+    vi.mocked(queries.updateProfile).mockReset()
   })
 
-  it('PATCH /profile merges fields', async () => {
-    const res = await patchProfile(jsonRequest('PATCH', { formatoPreferido: 'audio' }))
+  it('GET /api/profile returns the singleton wrapped', async () => {
+    vi.mocked(queries.getProfile).mockResolvedValue(seed)
+    const res = await GET()
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.formatoPreferido).toBe('audio')
-    expect(body.id).toBe('singleton')
+    expect(body.profile.userId).toBe('demo')
   })
 
-  it('PATCH /profile returns 400 on invalid', async () => {
-    const res = await patchProfile(jsonRequest('PATCH', { formatoPreferido: 'invalid' }))
+  it('PATCH /api/profile merges fields and returns 200', async () => {
+    vi.mocked(queries.updateProfile).mockResolvedValue({ ...seed, formatoPreferido: 'audio' })
+    const res = await PATCH(jsonRequest('PATCH', { formatoPreferido: 'audio' }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.profile.formatoPreferido).toBe('audio')
+    expect(vi.mocked(queries.updateProfile)).toHaveBeenCalledWith({ formatoPreferido: 'audio' })
+  })
+
+  it('PATCH /api/profile returns 400 on invalid formato', async () => {
+    const res = await PATCH(jsonRequest('PATCH', { formatoPreferido: 'invalid' }))
     expect(res.status).toBe(400)
+    expect(vi.mocked(queries.updateProfile)).not.toHaveBeenCalled()
   })
 
-  it('PATCH /profile ignores incoming id', async () => {
-    const res = await patchProfile(jsonRequest('PATCH', { id: 'hacked', friccionPromedio: 0.7 }))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.id).toBe('singleton')
-    expect(body.friccionPromedio).toBe(0.7)
+  it('PATCH /api/profile returns 400 on extra fields (strict)', async () => {
+    const res = await PATCH(jsonRequest('PATCH', { id: 'hacked' }))
+    expect(res.status).toBe(400)
+    expect(vi.mocked(queries.updateProfile)).not.toHaveBeenCalled()
   })
 })
