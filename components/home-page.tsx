@@ -8,6 +8,7 @@ import SubjectDetail from '@/components/subject-detail'
 import AddSubjectModal from '@/components/add-subject-modal'
 import { Plus } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
+import CareerProgressShader from '@/components/career-progress-shader'
 
 function flattenContent(nodes: ContentNode[]): ContentNode[] {
   return nodes.flatMap((n) => [n, ...(n.children ? flattenContent(n.children) : [])])
@@ -70,13 +71,14 @@ export default function HomePage() {
           {/* Career progress card */}
           <section
             aria-label="Progreso de la carrera"
-            className="overflow-hidden rounded-xl p-6"
+            className="relative overflow-hidden rounded-xl p-6"
             style={{
               backgroundImage:
                 'linear-gradient(96.07deg, rgb(0, 132, 255) 3.9%, rgb(0, 0, 0) 96.1%)',
             }}
           >
-            <div className="flex flex-wrap items-start justify-between gap-4 text-white font-medium tracking-[-0.5px]">
+            <CareerProgressShader className="pointer-events-none absolute inset-0 h-full w-full" />
+            <div className="relative flex flex-wrap items-start justify-between gap-4 text-white font-medium tracking-[-0.5px]">
               <div className="flex flex-col gap-4">
                 <p className="text-base leading-none opacity-50">Progreso de la carrera</p>
                 <p className="text-2xl leading-none">Licenciatura en Historia</p>
@@ -88,7 +90,7 @@ export default function HomePage() {
                 <p className="text-2xl leading-none">{careerProgress.percent}%</p>
               </div>
             </div>
-            <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-white/24 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
+            <div className="relative mt-5 h-1 w-full overflow-hidden rounded-full bg-white/24 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
               <div
                 className="h-full rounded-full bg-white transition-all"
                 style={{ width: `${careerProgress.percent}%` }}

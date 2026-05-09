@@ -212,24 +212,22 @@ export default function SubjectDetail({ subject, onBack }: SubjectDetailProps) {
             {subject.name}
           </h1>
 
-          {/* Materia progress card — visible only on Clases tab */}
-          {activeTab === 'clases' && (
-            <section
-              aria-label="Progreso de la materia"
-              className="overflow-hidden rounded-xl border border-black/8 bg-[#f8f8f8] px-5 pb-6 pt-5"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4 text-xl font-medium leading-[1.2] tracking-[-0.32px] text-black">
-                <p>Progreso de la materia</p>
-                <p className="text-right opacity-50">{progress}% completo</p>
-              </div>
-              <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-black/12 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
-                <div
-                  className="h-full rounded-full bg-black transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </section>
-          )}
+          {/* Materia progress card */}
+          <section
+            aria-label="Progreso de la materia"
+            className="overflow-hidden rounded-xl border border-black/8 bg-[#f8f8f8] px-5 pb-6 pt-5"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-4 text-xl font-medium leading-[1.2] tracking-[-0.32px] text-black">
+              <p>Progreso de la materia</p>
+              <p className="text-right opacity-50">{progress}% completo</p>
+            </div>
+            <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-black/12 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
+              <div
+                className="h-full rounded-full bg-black transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </section>
 
           {/* Tabs row (with right-side action on Documentación) */}
           <div className="flex w-full items-start gap-6">
