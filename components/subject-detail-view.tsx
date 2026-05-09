@@ -13,7 +13,8 @@ import {
   Plus,
 } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
-import { useApp } from '@/lib/app-context'
+import { useFiles, useUploadFile, useDeleteFile } from '@/lib/hooks/use-files'
+import { mapFileRow } from '@/lib/domain/adapters'
 import type { ContentNode, Source, Subject } from '@/lib/types'
 
 type TabType = 'clases' | 'documentacion'
@@ -236,9 +237,11 @@ function LockedLessonCard({ index, node }: Omit<LessonCardProps, 'onStart'>) {
 interface DocumentationTableProps {
   sources: Source[]
   onDownload: (source: Source) => void
+  onDelete: (source: Source) => void
+  isLoading?: boolean
 }
 
-function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
+function DocumentationTable({ sources, onDownload, onDelete, isLoading }: DocumentationTableProps) {
   const headerCellClass =
     'flex flex-1 min-w-px items-center px-6 py-4 text-base font-medium tracking-[-0.32px] text-black opacity-40'
   const cellClass =
@@ -262,7 +265,11 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
         <div className={headerCellClass}>Acciones</div>
       </div>
 
-      {sources.length === 0 ? (
+      {isLoading ? (
+        <div className="px-6 py-10 text-center text-base text-black/50">
+          Cargando documentos...
+        </div>
+      ) : sources.length === 0 ? (
         <div className="px-6 py-10 text-center text-base text-black/50">
           Aún no se cargaron documentos.
         </div>
@@ -279,7 +286,7 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
             <div className={cellClass}>{source.size}</div>
             <div className={cellClass}>{statusLabel(source.status)}</div>
             <div className={cellClass}>{formatDate(new Date(source.uploadedAt))}</div>
-            <div className="flex flex-1 min-w-px items-center px-6 py-4">
+            <div className="flex flex-1 min-w-px items-center gap-2 px-6 py-4">
               <button
                 type="button"
                 onClick={() => onDownload(source)}
@@ -287,6 +294,13 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
               >
                 <ArrowDownToLine className="size-4" strokeWidth={2} />
                 Descargar
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(source)}
+                className="inline-flex h-8 items-center gap-1 rounded-lg border border-red-300 px-2 text-sm font-medium tracking-[-0.28px] text-red-600 transition-colors hover:bg-red-50"
+              >
+                Eliminar
               </button>
             </div>
           </div>
@@ -302,7 +316,10 @@ interface SubjectDetailViewProps {
 
 export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   const router = useRouter()
-  const { addSource } = useApp()
+  const filesQuery = useFiles(subject.id)
+  const uploadMutation = useUploadFile(subject.id)
+  const deleteMutation = useDeleteFile(subject.id)
+  const sources = (filesQuery.data ?? []).map(mapFileRow)
   const [activeTab, setActiveTab] = useState<TabType>('clases')
   const [page, setPage] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -322,19 +339,15 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
 
   const onFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
-    files
-      .filter((f) => f.type === 'application/pdf')
-      .forEach((file) => {
-        const newSource: Source = {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          name: file.name,
-          type: 'pdf',
-          size: formatFileSize(file.size),
-          uploadedAt: new Date(),
-          status: 'ready',
-        }
-        addSource(subject.id, newSource)
-      })
+    const accepted = files.filter((f) =>
+      f.type === 'application/pdf' ||
+      f.type === 'application/msword' ||
+      f.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      f.type.startsWith('image/'),
+    )
+    for (const file of accepted) {
+      uploadMutation.mutate(file)
+    }
     e.target.value = ''
   }
 
@@ -495,7 +508,12 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
               </>
             )
           ) : (
-            <DocumentationTable sources={subject.sources} onDownload={onDownloadSource} />
+            <DocumentationTable
+              sources={sources}
+              onDownload={onDownloadSource}
+              onDelete={(source) => deleteMutation.mutate(source.id)}
+              isLoading={filesQuery.isLoading}
+            />
           )}
         </div>
       </main>
