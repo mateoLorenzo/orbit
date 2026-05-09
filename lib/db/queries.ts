@@ -205,10 +205,10 @@ export async function listNodesWithProgress(subjectId: string) {
 export interface NodeAssets {
   status: 'partial' | 'ready'
   lesson: { paragraphs: string[]; quiz: Array<{ question: string; options: string[] }> } | null
-  image: { url: string } | null
-  audio: { url: string; durationSec: number } | null
-  podcast: { url: string; durationSec: number } | null
-  video: { url: string; durationSec: number } | null
+  image: { s3Key: string } | null
+  audio: { s3Key: string; durationSec: number } | null
+  podcast: { s3Key: string; durationSec: number } | null
+  video: { s3Key: string; durationSec: number } | null
 }
 
 export async function getNodeAssets(nodeId: string): Promise<NodeAssets> {
@@ -232,18 +232,17 @@ export async function getNodeAssets(nodeId: string): Promise<NodeAssets> {
       }
     : null
 
-  const fromUrl = (k: string) => {
+  const fromKey = (k: string) => {
     const r = byType.get(k)
     return r?.contentUrl
-      ? { url: r.contentUrl, durationSec: (r.generationMetadata as any)?.durationSec ?? 0 }
+      ? { s3Key: r.contentUrl, durationSec: (r.generationMetadata as any)?.durationSec ?? 0 }
       : null
   }
-
   const imageRow = byType.get('image')
-  const image = imageRow?.contentUrl ? { url: imageRow.contentUrl } : null
-  const audio = fromUrl('audio')
-  const podcast = fromUrl('podcast')
-  const video = fromUrl('video')
+  const image = imageRow?.contentUrl ? { s3Key: imageRow.contentUrl } : null
+  const audio = fromKey('audio')
+  const podcast = fromKey('podcast')
+  const video = fromKey('video')
 
   // ready when lesson + image + audio all present (video/podcast optional for now)
   const status: 'partial' | 'ready' = lesson && image && audio ? 'ready' : 'partial'
