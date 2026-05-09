@@ -97,6 +97,7 @@ export default function ModuleLearningFlow({
             selectedIndex={selections[currentStep] ?? null}
             onSelect={handleSelect}
             onContinue={goNext}
+            onBack={goPrev}
           />
         )}
         {step.kind === 'done' && (
