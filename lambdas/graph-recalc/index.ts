@@ -255,6 +255,17 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     }
     console.log('graph-recalc: fan-out lesson-text', { subjectId, count: nodesToGenerate.length })
 
+    // Same node set fan-out to image generation (parallel pipeline).
+    for (const nodeId of nodesToGenerate) {
+      await sqs.send(
+        new SendMessageCommand({
+          QueueUrl: Resource.ImageGenerationQueue.url,
+          MessageBody: JSON.stringify({ nodeId, subjectId }),
+        }),
+      )
+    }
+    console.log('graph-recalc: fan-out image-gen', { subjectId, count: nodesToGenerate.length })
+
     console.log('graph-recalc: done', {
       subjectId,
       synthNodes: synth.nodes.length,
