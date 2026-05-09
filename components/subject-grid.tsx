@@ -1,90 +1,71 @@
 'use client'
 
-import { useApp } from '@/lib/app-context'
 import type { Subject } from '@/lib/types'
-import { Plus } from 'lucide-react'
 
 interface SubjectCardProps {
   subject: Subject
+  progress: number
   onClick: () => void
 }
 
-function SubjectCard({ subject, onClick }: SubjectCardProps) {
-  const sourcesCount = subject.sources.length
-  const contentCount = subject.content.length
-
+function SubjectCard({ subject, progress, onClick }: SubjectCardProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="group relative flex flex-col overflow-hidden rounded-xl bg-card border border-border p-5 text-left transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1"
+      className="group flex h-[187px] w-full flex-col items-start gap-4 overflow-hidden rounded-xl bg-white p-6 text-left transition-shadow hover:shadow-md"
     >
-      {/* Gradient header */}
-      <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${subject.color}`} />
-      
-      {/* Icon */}
-      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${subject.color} text-2xl shadow-lg`}>
-        {subject.icon}
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black text-2xl leading-none">
+        <span aria-hidden>{subject.icon}</span>
       </div>
 
-      {/* Content */}
-      <h3 className="mb-1 text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
-        {subject.name}
-      </h3>
-      <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
-        {subject.description}
-      </p>
-
-      {/* Stats */}
-      <div className="mt-auto flex items-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          {sourcesCount} {sourcesCount === 1 ? 'fuente' : 'fuentes'}
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-          {contentCount} {contentCount === 1 ? 'tema' : 'temas'}
-        </span>
+      <div className="w-full">
+        <h3 className="w-full truncate text-2xl font-medium leading-none tracking-[-0.5px] text-black">
+          {subject.name}
+        </h3>
       </div>
-    </button>
-  )
-}
 
-interface AddSubjectCardProps {
-  onClick: () => void
-}
-
-function AddSubjectCard({ onClick }: AddSubjectCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="group flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-card/50 p-8 text-muted-foreground transition-all duration-300 hover:border-primary hover:bg-card hover:text-primary"
-    >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-primary/10">
-        <Plus className="h-6 w-6" />
+      <div className="mt-auto flex w-full flex-col gap-3">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-black/12 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
+          <div
+            className="h-full rounded-full bg-black transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex w-full items-start justify-between text-base font-medium leading-[1.2] text-black">
+          <p className="opacity-50">Progreso</p>
+          <p className="text-right opacity-50">{progress}%</p>
+        </div>
       </div>
-      <span className="font-medium">Agregar materia</span>
     </button>
   )
 }
 
 interface SubjectGridProps {
+  subjects: Subject[]
   onSelectSubject: (subject: Subject) => void
-  onAddSubject: () => void
+  getProgress: (subject: Subject) => number
 }
 
-export default function SubjectGrid({ onSelectSubject, onAddSubject }: SubjectGridProps) {
-  const { subjects } = useApp()
+export default function SubjectGrid({ subjects, onSelectSubject, getProgress }: SubjectGridProps) {
+  if (subjects.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl bg-white px-6 py-16 text-center">
+        <p className="text-base text-black/50">No hay materias para mostrar.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((subject) => (
         <SubjectCard
           key={subject.id}
           subject={subject}
+          progress={getProgress(subject)}
           onClick={() => onSelectSubject(subject)}
         />
       ))}
-      <AddSubjectCard onClick={onAddSubject} />
     </div>
   )
 }
