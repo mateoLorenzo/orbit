@@ -34,3 +34,14 @@ export interface LessonNarration {
   generatingDelayMs?: number
   lines: NarratedLine[][]
 }
+
+export interface GenericLessonData {
+  paragraphs: string[]
+  quiz: Array<{
+    question: string
+    options: string[]
+    correctIndex?: number
+  }>
+  videoSrc?: string
+  audioSrc?: string
+}

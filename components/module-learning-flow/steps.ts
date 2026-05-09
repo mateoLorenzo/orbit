@@ -1,5 +1,5 @@
 import type { ContentNode } from '@/lib/types'
-import type { Step } from './types'
+import type { GenericLessonData, Step } from './types'
 
 export function buildSteps(node: ContentNode): Step[] {
   const baseParagraph = node.description?.trim()
@@ -77,4 +77,27 @@ export function buildSteps(node: ContentNode): Step[] {
     },
     { kind: 'done' },
   ]
+}
+
+export function buildStepsFromData(
+  lesson: GenericLessonData,
+  fallbackImage = '/learning-landscape.png',
+): Step[] {
+  const steps: Step[] = [{ kind: 'intro' }]
+  steps.push({
+    kind: 'content',
+    image: fallbackImage,
+    video: lesson.videoSrc,
+    paragraphs: lesson.paragraphs,
+  })
+  for (const q of lesson.quiz) {
+    steps.push({
+      kind: 'quiz',
+      question: q.question,
+      options: q.options,
+      correctIndex: q.correctIndex ?? 0,
+    })
+  }
+  steps.push({ kind: 'done' })
+  return steps
 }
