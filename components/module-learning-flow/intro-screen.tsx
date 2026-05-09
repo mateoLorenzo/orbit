@@ -20,21 +20,7 @@ export function IntroScreen({ subject: _subject, node, onStart }: IntroScreenPro
   const label = `${TYPE_LABEL[node.type] ?? 'Clase'} ${node.order}`
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: [
-            'radial-gradient(60% 55% at 50% -8%, rgba(255,79,0,0.95) 0%, rgba(255,79,0,0) 70%)',
-            'radial-gradient(60% 55% at 50% 108%, rgba(255,79,0,0.95) 0%, rgba(255,79,0,0) 70%)',
-            'radial-gradient(50% 90% at -6% 50%, rgba(255,79,0,0.95) 0%, rgba(255,79,0,0) 70%)',
-            'radial-gradient(50% 90% at 106% 50%, rgba(255,79,0,0.95) 0%, rgba(255,79,0,0) 70%)',
-            '#f8f8f8',
-          ].join(', '),
-        }}
-      />
-
+    <div className="bg-orange-corners relative flex flex-1 items-center justify-center overflow-hidden">
       <div className="relative flex w-full max-w-[920px] flex-col items-center gap-6 px-6 text-center">
         <div className="inline-flex h-10 items-center justify-center rounded-lg border border-black/12 bg-transparent px-3 animate-in fade-in zoom-in-95 duration-700 fill-mode-backwards">
           <p className="text-base font-medium tracking-[-0.32px] text-black">{label}</p>

@@ -124,25 +124,34 @@ export function TimelineScreen({ step, onBack, onNext }: TimelineScreenProps) {
         }
         const { index, isActive, isPast, number, title } = props
         const showNumber = isActive || isPast
-        const numberColor = isActive ? 'text-[#ff4f00]' : 'text-black'
+        const numberColor = isActive ? 'text-[#ff4f00]' : 'text-white'
         const borderClass = isActive ? 'border-[#ff4f00]' : 'border-black/8'
         const delay = NODE_BASE_DELAY_MS + index * NODE_STAGGER_MS
+        const imageIndex = (index % 5) + 1
+        const bgImage = `/timeline/san-martin-card-timeline-${imageIndex}.png`
 
         return (
           <button
             type="button"
             onClick={() => setActiveIndex(index)}
-            style={{ ['--delay' as string]: `${delay}ms` }}
-            className={`flex aspect-square w-[200px] flex-col items-start gap-3 overflow-hidden rounded-xl border bg-white p-6 text-left transition-all duration-200 hover:scale-[1.02] [animation:timeline-card-in_400ms_cubic-bezier(0.34,1.56,0.64,1)_var(--delay)_both] ${borderClass}`}
+            style={{
+              ['--delay' as string]: `${delay}ms`,
+              backgroundImage: `url(${bgImage})`,
+            }}
+            className={`relative flex aspect-square w-[200px] flex-col items-start gap-3 overflow-hidden rounded-xl border bg-white bg-cover bg-center p-6 text-left transition-all duration-200 hover:scale-[1.02] [animation:timeline-card-in_400ms_cubic-bezier(0.34,1.56,0.64,1)_var(--delay)_both] ${borderClass}`}
           >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10"
+            />
             {showNumber ? (
               <span
-                className={`text-sm font-medium leading-none tracking-[-0.28px] ${numberColor}`}
+                className={`relative text-sm font-medium leading-none tracking-[-0.28px] ${numberColor}`}
               >
                 {number}
               </span>
             ) : null}
-            <p className="text-base font-medium leading-[1.25] tracking-[-0.5px] text-black">
+            <p className="relative mt-auto text-base font-medium leading-[1.25] tracking-[-0.5px] text-white">
               {title}
             </p>
           </button>
