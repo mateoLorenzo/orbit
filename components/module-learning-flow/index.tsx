@@ -25,7 +25,7 @@ export default function ModuleLearningFlow({
 
   const step = steps[currentStep]
   const isFirstLessonAnimatedSlide =
-    currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 4
+    currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 3
   const isSecondLessonAnimatedSlide =
     currentStep === 3 && step.kind === 'content' && step.paragraphs.length >= 4
   const lessonNarration = isFirstLessonAnimatedSlide

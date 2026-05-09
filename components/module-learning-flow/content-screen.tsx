@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { IconButton, PrimaryButton, SecondaryButton } from './primitives'
-import type { ContentStep, LessonNarration, NarratedLine } from './types'
-import { useNarrationAudio } from './use-narration-audio'
+import type { ContentStep, LessonNarration } from './types'
+import { useNarrationAudio, type NarratedWord } from './use-narration-audio'
 
 interface ContentScreenProps {
   step: ContentStep
@@ -15,26 +15,28 @@ interface ContentScreenProps {
   narration?: LessonNarration
 }
 
-function NarratedParagraph({
-  lines,
-  revealedCount,
-}: {
-  lines: NarratedLine[]
-  revealedCount: number
-}) {
-  const fullText = lines.map((line) => line.text).join(' ')
+function NarratedParagraph({ wordsByLine }: { wordsByLine: NarratedWord[][] }) {
+  const fullText = wordsByLine
+    .map((line) => line.map((word) => word.text).join(' '))
+    .join(' ')
   return (
     <p className="leading-[1.25] tracking-[-0.5px]">
       <span className="sr-only">{fullText}</span>
       <span aria-hidden>
-        {lines.map((line, index) => (
-          <span
-            key={index}
-            className={`transition-colors duration-500 ${index < revealedCount ? 'text-black' : 'text-black/24'
-              }`}
-          >
-            {line.text}
-            {index < lines.length - 1 ? ' ' : ''}
+        {wordsByLine.map((line, lineIdx) => (
+          <span key={lineIdx}>
+            {line.map((word, wordIdx) => (
+              <span
+                key={wordIdx}
+                className={`transition-colors duration-200 ${
+                  word.revealed ? 'text-black' : 'text-black/24'
+                }`}
+              >
+                {word.text}
+                {wordIdx < line.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+            {lineIdx < wordsByLine.length - 1 ? ' ' : ''}
           </span>
         ))}
       </span>
@@ -130,17 +132,17 @@ function VoicePanel({
 
 function ContentText({
   paragraphs,
-  narratedLines,
+  narratedParagraphCount,
   subtitleEnabled,
-  getRevealedLines,
+  getNarratedParagraph,
 }: {
   paragraphs: string[]
-  narratedLines: NarratedLine[][]
+  narratedParagraphCount: number
   subtitleEnabled: boolean
-  getRevealedLines: (paragraphIndex: number) => number
+  getNarratedParagraph: (paragraphIndex: number) => NarratedWord[][]
 }) {
   const fadedAfter = 1
-  const narrationOffset = paragraphs.length - narratedLines.length
+  const narrationOffset = paragraphs.length - narratedParagraphCount
 
   return (
     <div className="relative flex-1 overflow-hidden p-6">
@@ -149,19 +151,16 @@ function ContentText({
           const isNarrated =
             subtitleEnabled &&
             index >= narrationOffset &&
-            index < narrationOffset + narratedLines.length
-          const lines = isNarrated ? narratedLines[index - narrationOffset] : null
+            index < narrationOffset + narratedParagraphCount
+          const wordsByLine = isNarrated ? getNarratedParagraph(index - narrationOffset) : null
           return (
             <div
               key={index}
               className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
               style={{ animationDelay: `${index * 90 + 100}ms` }}
             >
-              {lines ? (
-                <NarratedParagraph
-                  lines={lines}
-                  revealedCount={getRevealedLines(index - narrationOffset)}
-                />
+              {wordsByLine && wordsByLine.length > 0 ? (
+                <NarratedParagraph wordsByLine={wordsByLine} />
               ) : (
                 <p className={index > fadedAfter ? 'text-black/24' : 'text-black'}>
                   {paragraph}
@@ -187,7 +186,7 @@ export function ContentScreen({
   const {
     audioRef,
     audioSrc,
-    getRevealedLines,
+    getNarratedParagraph,
     isGenerating,
     lines,
     playState,
@@ -216,9 +215,9 @@ export function ContentScreen({
         >
           <ContentText
             paragraphs={step.paragraphs}
-            narratedLines={lines}
+            narratedParagraphCount={lines.length}
             subtitleEnabled={subtitleEnabled}
-            getRevealedLines={getRevealedLines}
+            getNarratedParagraph={getNarratedParagraph}
           />
           <VoicePanel
             voice={voice}
