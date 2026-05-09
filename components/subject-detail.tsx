@@ -212,7 +212,7 @@ export default function SubjectDetail({ subject, onBack }: SubjectDetailProps) {
             {subject.name}
           </h1>
 
-          {/* Materia progress card */}
+          {/* Materia progress card — persistent across tabs to keep layout stable */}
           <section
             aria-label="Progreso de la materia"
             className="overflow-hidden rounded-xl border border-black/8 bg-[#f8f8f8] px-5 pb-6 pt-5"
