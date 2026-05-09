@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useApp } from '@/lib/app-context'
+import { useCreateSubject } from '@/lib/hooks/use-subjects'
 import { subjectIcons, SubjectIcon } from '@/lib/subject-icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,7 @@ interface AddSubjectModalProps {
 }
 
 export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProps) {
-  const { addSubject } = useApp()
+  const createMutation = useCreateSubject()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedIcon, setSelectedIcon] = useState(subjectIcons[0])
@@ -22,13 +22,18 @@ export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (name.trim()) {
-      addSubject(name.trim(), description.trim(), selectedIcon)
-      setName('')
-      setDescription('')
-      setSelectedIcon(subjectIcons[0])
-      onClose()
-    }
+    if (!name.trim()) return
+    createMutation.mutate(
+      { name: name.trim(), description: description.trim() || undefined },
+      {
+        onSuccess: () => {
+          setName('')
+          setDescription('')
+          setSelectedIcon(subjectIcons[0])
+          onClose()
+        },
+      },
+    )
   }
 
   return (
@@ -119,10 +124,10 @@ export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProp
             </Button>
             <Button
               type="submit"
-              disabled={!name.trim()}
+              disabled={!name.trim() || createMutation.isPending}
               className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Crear materia
+              {createMutation.isPending ? 'Creando...' : 'Crear materia'}
             </Button>
           </div>
         </form>
