@@ -98,6 +98,17 @@
   }
 }
 
+@layer utilities {
+  .bg-orange-corners {
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(ellipse 35% 45% at 0% 0%, #ff5c00 0%, transparent 100%),
+      radial-gradient(ellipse 35% 45% at 100% 0%, #ff5c00 0%, transparent 100%),
+      radial-gradient(ellipse 35% 45% at 0% 100%, #ff5c00 0%, transparent 100%),
+      radial-gradient(ellipse 35% 45% at 100% 100%, #ff5c00 0%, transparent 100%);
+  }
+}
+
 /* Pointer cursor on interactive elements — inside @layer utilities so Tailwind v4 emits it */
 @layer utilities {
   button:not(:disabled),

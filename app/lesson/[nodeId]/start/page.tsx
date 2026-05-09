@@ -31,11 +31,7 @@ export default function LessonStartPage() {
     <PageTransition
       pageKey="lesson-start"
       variant="fade-slow"
-      className="relative flex flex-1 items-center justify-center overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(ellipse 70% 80% at 50% 50%, #ffffff 0%, #ffffff 28%, rgba(255, 92, 0, 0.45) 75%, #FF5C00 100%)',
-      }}
+      className="bg-orange-corners relative flex flex-1 items-center justify-center overflow-hidden"
     >
       <motion.div
         variants={FADE_CONTAINER}

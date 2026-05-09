@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         url: '/icon-light-32x32.png',
       },
       {
-        url: '/icon.svg',
+        url: '/svg/icon.svg',
         type: 'image/svg+xml',
       },
     ],

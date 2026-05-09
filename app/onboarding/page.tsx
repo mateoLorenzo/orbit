@@ -1,52 +1,32 @@
 'use client'
 
 import Link from 'next/link'
-import { motion, type Variants } from 'motion/react'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
-
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.7, ease: EASE } },
-}
-
-const FADE_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
-}
 
 export default function OnboardingSplashPage() {
   return (
     <PageTransition
       pageKey="onboarding-splash"
       variant="fade-slow"
-      className="relative flex flex-1 items-center justify-center overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(ellipse 70% 80% at 50% 50%, #ffffff 0%, #ffffff 28%, rgba(255, 92, 0, 0.45) 75%, #FF5C00 100%)',
-      }}
+      className="bg-orange-corners relative flex flex-1 items-center justify-center overflow-hidden"
     >
-      <motion.div
-        variants={FADE_CONTAINER}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col items-center gap-10 px-6 text-center"
-      >
-        <motion.div variants={FADE_CHILD}>
+      <div className="flex flex-col items-center gap-10 px-6 text-center">
+        <div className="animate-in fade-in zoom-in-95 duration-700">
           <BrandIcon />
-        </motion.div>
+        </div>
 
-        <motion.h1
-          variants={FADE_CHILD}
-          className="text-[44px] font-semibold leading-[1.1] tracking-[-1.2px]"
-        >
-          <span className="block text-black">La manera de aprender,</span>
-          <span className="block text-[#FF5C00]">ahora reimaginada</span>
-        </motion.h1>
+        <h1 className="text-[44px] font-semibold leading-[1.1] tracking-[-1.2px]">
+          <span className="block text-black animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
+            La manera de aprender,
+          </span>
+          <span className="block text-[#FF5C00] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+            ahora reimaginada
+          </span>
+        </h1>
 
-        <motion.div variants={FADE_CHILD}>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 delay-500 fill-mode-backwards">
           <Link
             href="/onboarding/level"
             className="inline-flex h-12 items-center gap-2 rounded-xl bg-[#FF5C00] px-5 text-base font-medium tracking-[-0.32px] text-white shadow-[0_8px_24px_-12px_rgba(255,92,0,0.6)] transition-[transform,filter] hover:brightness-110 hover:-translate-y-px"
@@ -54,37 +34,22 @@ export default function OnboardingSplashPage() {
             Comenzar
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </Link>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </PageTransition>
   )
 }
 
 function BrandIcon() {
   return (
-    <div
-      className="flex size-[88px] -rotate-[8deg] items-center justify-center rounded-[22px] shadow-[0_18px_40px_-12px_rgba(255,92,0,0.5),inset_0_1px_0_rgba(255,255,255,0.25)]"
-      style={{
-        background: 'linear-gradient(150deg, #FF7A1F 0%, #FF5C00 55%, #E64A00 100%)',
-      }}
+    <Image
+      src="/svg/icon.svg"
+      alt=""
+      width={88}
+      height={88}
+      priority
       aria-hidden
-    >
-      <svg
-        viewBox="0 0 40 40"
-        fill="none"
-        className="size-12"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="20" cy="11" r="3.8" fill="white" />
-        <circle cx="10" cy="28" r="3" fill="white" />
-        <circle cx="30" cy="28" r="3" fill="white" />
-        <path
-          d="M17.6 13.5 L12 25 M22.4 13.5 L28 25"
-          stroke="white"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
+      className="drop-shadow-[0_18px_24px_rgba(255,92,0,0.35)]"
+    />
   )
 }
