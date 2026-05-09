@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/db/queries', () => ({
   getSubject: vi.fn(),
+  getSubjectBySlug: vi.fn(),
   listProgressForSubject: vi.fn(),
   summarizeProgressForSubject: vi.fn(),
   upsertNodeProgress: vi.fn(),
@@ -34,19 +35,20 @@ const fakeSubject = {
 describe('Progress routes (Drizzle)', () => {
   beforeEach(() => {
     vi.mocked(queries.getSubject).mockReset()
+    vi.mocked(queries.getSubjectBySlug).mockReset()
     vi.mocked(queries.listProgressForSubject).mockReset()
     vi.mocked(queries.summarizeProgressForSubject).mockReset()
     vi.mocked(queries.upsertNodeProgress).mockReset()
   })
 
   it('GET /subjects/:id/progress 404 when subject missing', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(null as never)
+    vi.mocked(queries.getSubjectBySlug).mockResolvedValue(null as never)
     const res = await listProgress(jsonRequest('GET'), { params: Promise.resolve({ id: 'nope' }) })
     expect(res.status).toBe(404)
   })
 
   it('GET /subjects/:id/progress returns wrapped array', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(fakeSubject)
+    vi.mocked(queries.getSubjectBySlug).mockResolvedValue(fakeSubject)
     vi.mocked(queries.listProgressForSubject).mockResolvedValue([
       { id: 'p1', nodeId: 'n1', status: 'mastered' as const, completedAt: null, updatedAt: new Date() },
     ])
@@ -57,13 +59,13 @@ describe('Progress routes (Drizzle)', () => {
   })
 
   it('GET /subjects/:id/progress/summary 404 when subject missing', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(null as never)
+    vi.mocked(queries.getSubjectBySlug).mockResolvedValue(null as never)
     const res = await getSummary(jsonRequest('GET'), { params: Promise.resolve({ id: 'nope' }) })
     expect(res.status).toBe(404)
   })
 
   it('GET /subjects/:id/progress/summary returns summary', async () => {
-    vi.mocked(queries.getSubject).mockResolvedValue(fakeSubject)
+    vi.mocked(queries.getSubjectBySlug).mockResolvedValue(fakeSubject)
     vi.mocked(queries.summarizeProgressForSubject).mockResolvedValue({
       total: 4, mastered: 2, inProgress: 1, available: 1, locked: 0, percentMastered: 50,
     })
