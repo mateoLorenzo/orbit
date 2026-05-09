@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
 import { useFiles, useUploadFile, useDeleteFile } from '@/lib/hooks/use-files'
+import { useNodes } from '@/lib/hooks/use-nodes'
 import { mapFileRow } from '@/lib/domain/adapters'
 import type { ContentNode, Source, Subject } from '@/lib/types'
 
@@ -32,6 +33,12 @@ function getSubjectProgress(subject: Subject): number {
   if (all.length === 0) return 0
   const completed = all.filter((n) => n.status === 'completado').length
   return Math.round((completed / all.length) * 100)
+}
+
+function getSubjectProgressFromLessons(lessons: ContentNode[]): number {
+  if (lessons.length === 0) return 0
+  const completed = lessons.filter((n) => n.status === 'completado').length
+  return Math.round((completed / lessons.length) * 100)
 }
 
 function getCardStates(content: ContentNode[]): CardState[] {
@@ -64,6 +71,26 @@ function formatDate(date: Date): string {
     month: 'short',
     year: 'numeric',
   }).format(date)
+}
+
+function nodeToContentNode(
+  n: { id: string; title: string; contentBrief: string; progressStatus: 'locked' | 'available' | 'in_progress' | 'mastered' },
+  index: number,
+): ContentNode {
+  const statusMap = {
+    locked: 'pendiente',
+    available: 'pendiente',
+    in_progress: 'en-progreso',
+    mastered: 'completado',
+  } as const
+  return {
+    id: n.id,
+    title: n.title,
+    description: n.contentBrief,
+    type: 'clase',
+    status: statusMap[n.progressStatus],
+    order: index + 1,
+  }
 }
 
 function statusLabel(status: Source['status']): string {
@@ -324,13 +351,18 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   const [page, setPage] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const progress = useMemo(() => getSubjectProgress(subject), [subject])
-  const cardStates = useMemo(() => getCardStates(subject.content), [subject.content])
+  const nodesQuery = useNodes(subject.id)
+  const lessons: ContentNode[] = useMemo(
+    () => (nodesQuery.data ?? []).map((n, i) => nodeToContentNode(n, i)),
+    [nodesQuery.data],
+  )
+  const progress = useMemo(() => getSubjectProgressFromLessons(lessons), [lessons])
+  const cardStates = useMemo(() => getCardStates(lessons), [lessons])
 
-  const totalPages = Math.max(1, Math.ceil(subject.content.length / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(lessons.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
   const startIndex = safePage * PAGE_SIZE
-  const visibleClasses = subject.content.slice(startIndex, startIndex + PAGE_SIZE)
+  const visibleClasses = lessons.slice(startIndex, startIndex + PAGE_SIZE)
   const visibleStates = cardStates.slice(startIndex, startIndex + PAGE_SIZE)
 
   const onAddDocumentsClick = () => {
@@ -442,10 +474,17 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
           />
 
           {activeTab === 'clases' ? (
-            subject.content.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl bg-white px-6 py-16 text-center">
-                <p className="text-base text-black/50">
-                  Aún no hay clases para esta materia.
+            nodesQuery.isLoading ? (
+              <div className="px-6 py-10 text-center text-base text-black/50">
+                Cargando lecciones...
+              </div>
+            ) : lessons.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+                <p className="text-base font-medium tracking-[-0.32px] text-black">
+                  Estamos generando las lecciones a partir de tus PDFs.
+                </p>
+                <p className="text-sm text-black/50">
+                  Esto suele tomar 1-3 minutos. Esta página se va a actualizar sola.
                 </p>
               </div>
             ) : (
