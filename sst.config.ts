@@ -120,6 +120,16 @@ export default $config({
       artifactsBucket,
     ]
 
+    // Cap how many concurrent invocations each SQS event source can spawn.
+    // This limits runaway scaling per-queue without touching the account
+    // unreserved-concurrency quota (which on new accounts is only 10 and forbids
+    // function-level reservation). Effective burst cap = MAX_QUEUE_CONCURRENCY × #lambdas.
+    const MAX_QUEUE_CONCURRENCY = 5
+
+    function withConcurrency(args: { scalingConfig?: { maximumConcurrency?: number } }) {
+      args.scalingConfig = { maximumConcurrency: MAX_QUEUE_CONCURRENCY }
+    }
+
     // ─── Lambda: file-router ──────────────────────────────────────────────
     // Reads from FileIngestionQueue (which receives S3 events), classifies by
     // mime type, and forwards to the right type-specific queue.
@@ -137,7 +147,9 @@ export default $config({
         videoQ.main,
       ],
     })
-    fileIngestionQ.main.subscribe(fileRouter.arn)
+    fileIngestionQ.main.subscribe(fileRouter.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
 
     // ─── Lambda: pdf-processor ────────────────────────────────────────────
     const pdfProcessor = new sst.aws.Function('PdfProcessor', {
@@ -147,7 +159,9 @@ export default $config({
       environment: lambdaEnv,
       link: [...sharedLink, pdfQ.main, embeddingQ.main],
     })
-    pdfQ.main.subscribe(pdfProcessor.arn)
+    pdfQ.main.subscribe(pdfProcessor.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
 
     // ─── Lambda: embedder ─────────────────────────────────────────────────
     const embedder = new sst.aws.Function('Embedder', {
@@ -157,7 +171,9 @@ export default $config({
       environment: lambdaEnv,
       link: [...sharedLink, embeddingQ.main, graphRecalcQ.main],
     })
-    embeddingQ.main.subscribe(embedder.arn)
+    embeddingQ.main.subscribe(embedder.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
 
     // ─── Lambda: graph-recalc ─────────────────────────────────────────────
     const graphRecalc = new sst.aws.Function('GraphRecalc', {
