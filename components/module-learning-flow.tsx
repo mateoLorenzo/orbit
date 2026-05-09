@@ -15,6 +15,7 @@ interface ModuleLearningFlowProps {
 interface ContentStep {
   kind: 'content'
   image: string
+  video?: string
   paragraphs: string[]
 }
 
@@ -39,6 +40,7 @@ function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'content',
       image: '/learning-landscape.png',
+      video: '/SanMartinAndes.mp4',
       paragraphs: [
         baseParagraph,
         'San Martín planificó durante años el cruce de los Andes, coordinando logística, abastecimiento y rutas posibles a través de seis pasos diferentes para confundir al enemigo realista.',
@@ -71,6 +73,7 @@ function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'content',
       image: '/learning-landscape.png',
+      video: '/SanMartinAndes.mp4',
       paragraphs: [
         'El cruce permitió sorprender al ejército realista en Chacabuco, batalla decisiva que abrió las puertas de Santiago de Chile.',
         'Esta victoria reorganizó el equilibrio militar en el sur del continente y debilitó al poder español en el Pacífico.',
@@ -237,16 +240,29 @@ function ContentScreen({ step, voice, onChangeVoice, onBack, onNext }: ContentSc
           </div>
         </div>
 
-        {/* Right column - image */}
+        {/* Right column - media (video or image) */}
         <div className="relative flex-1 overflow-hidden rounded-xl bg-black/4 animate-in fade-in zoom-in-95 duration-700">
-          <Image
-            src={step.image}
-            alt="Ilustración del tema"
-            fill
-            sizes="(min-width: 1024px) 60vw, 100vw"
-            className="object-cover"
-            priority
-          />
+          {step.video ? (
+            <video
+              key={step.video}
+              src={step.video}
+              poster={step.image}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <Image
+              src={step.image}
+              alt="Ilustración del tema"
+              fill
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          )}
           <div className="absolute inset-0 flex items-end justify-end p-4">
             <SecondaryButton>Abrir</SecondaryButton>
           </div>
