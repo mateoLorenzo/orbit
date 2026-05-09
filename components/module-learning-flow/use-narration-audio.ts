@@ -1,11 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LessonNarration } from './types'
+
+interface ScheduledWord {
+  text: string
+  startSeconds: number
+}
+
+export interface NarratedWord {
+  text: string
+  revealed: boolean
+}
 
 export function useNarrationAudio({ narration }: { narration?: LessonNarration }) {
   const [playState, setPlayState] = useState<'playing' | 'paused' | 'stopped'>('stopped')
   const [currentTime, setCurrentTime] = useState(0)
+  const [audioDuration, setAudioDuration] = useState(0)
   const [isGenerating, setIsGenerating] = useState(() => Boolean(narration))
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const frameRef = useRef<number | null>(null)
@@ -27,6 +38,7 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
     }
 
     setCurrentTime(0)
+    setAudioDuration(0)
     setPlayState('stopped')
     setIsGenerating(true)
     audio.pause()
@@ -39,6 +51,9 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
       }
     }
 
+    const handleLoadedMetadata = () => {
+      if (Number.isFinite(audio.duration)) setAudioDuration(audio.duration)
+    }
     const handlePlay = () => {
       setPlayState('playing')
       stopAudioClock()
@@ -55,9 +70,13 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
       setPlayState('stopped')
     }
 
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
     audio.addEventListener('play', handlePlay)
     audio.addEventListener('pause', handlePause)
     audio.addEventListener('ended', handleEnded)
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      setAudioDuration(audio.duration)
+    }
 
     const delay = narration.generatingDelayMs ?? 1500
     const timer = window.setTimeout(() => {
@@ -68,6 +87,7 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
     return () => {
       window.clearTimeout(timer)
       stopAudioClock()
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('ended', handleEnded)
@@ -101,23 +121,67 @@ export function useNarrationAudio({ narration }: { narration?: LessonNarration }
     void audio.play().catch(() => setPlayState('paused'))
   }
 
-  const getRevealedLines = (paragraphIndex: number) => {
-    if (!narration || isGenerating) return 0
-    const lines = narration.lines[paragraphIndex]
-    if (!lines) return 0
+  // Build a per-word schedule by spreading each line's words across its window
+  // [line.startSeconds, nextLineStart], proportionally to character count.
+  const wordSchedule = useMemo<ScheduledWord[][][]>(() => {
+    if (!narration) return []
 
-    let revealed = 0
-    for (const line of lines) {
-      if (currentTime >= line.startSeconds) revealed += 1
-      else break
+    const flat: { paragraphIndex: number; lineIndex: number; text: string; startSeconds: number }[] = []
+    narration.lines.forEach((paragraph, pIdx) => {
+      paragraph.forEach((line, lIdx) => {
+        flat.push({
+          paragraphIndex: pIdx,
+          lineIndex: lIdx,
+          text: line.text,
+          startSeconds: line.startSeconds,
+        })
+      })
+    })
+
+    const schedule: ScheduledWord[][][] = narration.lines.map((p) => p.map(() => []))
+
+    for (let i = 0; i < flat.length; i++) {
+      const cur = flat[i]
+      const next = flat[i + 1]
+      const fallbackEnd =
+        audioDuration > cur.startSeconds ? audioDuration : cur.startSeconds + 4
+      const endSeconds = next ? next.startSeconds : fallbackEnd
+      const span = Math.max(0.2, endSeconds - cur.startSeconds)
+
+      const words = cur.text.split(/\s+/).filter(Boolean)
+      const totalChars = words.reduce((sum, w) => sum + w.length, 0) || 1
+
+      let charsSoFar = 0
+      const wordsWithTimes: ScheduledWord[] = words.map((text) => {
+        const start = cur.startSeconds + (charsSoFar / totalChars) * span
+        charsSoFar += text.length
+        return { text, startSeconds: start }
+      })
+
+      schedule[cur.paragraphIndex][cur.lineIndex] = wordsWithTimes
     }
-    return revealed
+
+    return schedule
+  }, [narration, audioDuration])
+
+  const getNarratedParagraph = (paragraphIndex: number): NarratedWord[][] => {
+    const paragraph = wordSchedule[paragraphIndex]
+    if (!paragraph) return []
+    if (isGenerating) {
+      return paragraph.map((line) => line.map((w) => ({ text: w.text, revealed: false })))
+    }
+    // Reveal each word ~200ms before its audio onset so that the midpoint of the
+    // fade transition lands roughly when the word is actually spoken.
+    const leadSeconds = 0.2
+    return paragraph.map((line) =>
+      line.map((w) => ({ text: w.text, revealed: currentTime + leadSeconds >= w.startSeconds })),
+    )
   }
 
   return {
     audioRef,
     audioSrc: narration?.audioSrc,
-    getRevealedLines,
+    getNarratedParagraph,
     isGenerating,
     lines: narration?.lines ?? [],
     playState,

@@ -2,10 +2,6 @@ import type { ContentNode } from '@/lib/types'
 import type { Step } from './types'
 
 export function buildSteps(node: ContentNode): Step[] {
-  const baseParagraph = node.description?.trim()
-    ? node.description.trim()
-    : 'Este contenido fue generado a partir de tus materiales para acompañarte en el estudio del tema.'
-
   return [
     { kind: 'intro' },
     {
@@ -13,7 +9,6 @@ export function buildSteps(node: ContentNode): Step[] {
       image: '/learning-landscape.png',
       video: '/SanMartinAndes.mp4',
       paragraphs: [
-        baseParagraph,
         'San Martín planificó durante años el cruce de los Andes, coordinando logística, abastecimiento y rutas posibles a través de seis pasos diferentes para confundir al enemigo realista.',
         'El Ejército de los Andes partió en enero de 1817 desde Mendoza con cerca de cinco mil hombres, mulas, cañones y provisiones para alimentar a la tropa durante el cruce.',
         'La marcha duró aproximadamente tres semanas y combinó disciplina militar con un fuerte componente moral apoyado en banderas, símbolos y discursos.',
