@@ -16,9 +16,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'EduApp - Tu plataforma de estudio',
+  title: 'Orbit - Tu plataforma de estudio',
   description: 'Organiza tus materias y genera contenido con IA',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
@@ -30,6 +29,17 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: 'Orbit - Tu plataforma de estudio',
+    description: 'Organiza tus materias y genera contenido con IA',
+    type: 'website',
+    locale: 'es_AR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Orbit - Tu plataforma de estudio',
+    description: 'Organiza tus materias y genera contenido con IA',
   },
 }
 
