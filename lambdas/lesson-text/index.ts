@@ -1,7 +1,11 @@
 import type { SQSEvent, SQSHandler } from 'aws-lambda'
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs'
 import { eq, and, desc, sql } from 'drizzle-orm'
+import { Resource } from 'sst'
 import { getDb, schema } from '../_shared/db'
 import { generateLessonText } from './synth'
+
+const sqs = new SQSClient({})
 
 const MAX_CHUNKS_PER_PROMPT = 8 // ~5k tokens cap
 
@@ -132,6 +136,14 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         )
 
       console.log('lesson-text: done', { nodeId, paragraphs: lesson.paragraphs.length, quiz: lesson.quiz.length })
+
+      // Fan out audio narration now that paragraphs exist.
+      await sqs.send(
+        new SendMessageCommand({
+          QueueUrl: Resource.AudioNarrationQueue.url,
+          MessageBody: JSON.stringify({ nodeId }),
+        }),
+      )
     } catch (err) {
       console.error('lesson-text: failed', { nodeId, err })
       await db
