@@ -195,14 +195,33 @@ export function ContentScreen({
         </div>
 
         <div className="relative flex-1 overflow-hidden rounded-xl bg-black/4 animate-in fade-in zoom-in-95 duration-700">
-          <Image
-            src={step.image}
-            alt="Ilustración del tema"
-            fill
-            sizes="(min-width: 1024px) 60vw, 100vw"
-            className="object-cover"
-            priority
-          />
+          {step.video ? (
+            <video
+              key={step.video}
+              src={step.video}
+              poster={step.image}
+              autoPlay
+              loop={step.videoLoop !== false}
+              muted
+              playsInline
+              onEnded={(e) => {
+                // Park on the last frame instead of resetting / showing controls
+                const v = e.currentTarget
+                v.pause()
+                v.currentTime = Math.max(0, v.duration - 0.001)
+              }}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <Image
+              src={step.image}
+              alt="Ilustración del tema"
+              fill
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          )}
           <div className="absolute inset-0 flex items-end justify-end p-4">
             <SecondaryButton>Abrir</SecondaryButton>
           </div>
