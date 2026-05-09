@@ -66,6 +66,18 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "LessonTextGenerationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "LessonTextGenerationQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "LessonTextGenerator": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "ImageQueue": {
       "type": "sst.aws.Queue"
       "url": string
