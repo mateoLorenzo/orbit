@@ -13,26 +13,22 @@ export default async function OpenGraphImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background:
-            'radial-gradient(ellipse 60% 80% at 50% 50%, #ffffff 0%, #ffffff 25%, rgba(255, 92, 0, 0.45) 75%, #FF5C00 100%)',
-          fontFamily: 'sans-serif',
+          background: '#f8f8f8',
         }}
       >
         <div
           style={{
             display: 'flex',
-            width: 200,
-            height: 200,
-            transform: 'rotate(-6deg)',
-            filter: 'drop-shadow(0 24px 40px rgba(255, 92, 0, 0.45))',
+            width: 360,
+            height: 360,
+            filter: 'drop-shadow(0 30px 60px rgba(255, 92, 0, 0.35))',
           }}
         >
           <svg
-            width="200"
-            height="200"
+            width="360"
+            height="360"
             viewBox="0 0 72 72"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -59,32 +55,6 @@ export default async function OpenGraphImage() {
               </linearGradient>
             </defs>
           </svg>
-        </div>
-
-        <div
-          style={{
-            marginTop: 56,
-            fontSize: 88,
-            fontWeight: 700,
-            letterSpacing: '-2px',
-            color: '#0A0A0A',
-            display: 'flex',
-          }}
-        >
-          Orbit
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            fontSize: 36,
-            fontWeight: 500,
-            letterSpacing: '-0.5px',
-            color: 'rgba(10,10,10,0.55)',
-            display: 'flex',
-          }}
-        >
-          Tu plataforma de estudio
         </div>
       </div>
     ),
