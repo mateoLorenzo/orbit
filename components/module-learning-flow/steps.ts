@@ -20,8 +20,13 @@ export function buildSteps(node: ContentNode): Step[] {
     },
     {
       kind: 'quiz',
-      question: '¿Quién fue quien pasó la Cordillera de Los Andes?',
-      options: ['Belgrano', 'San Martín', 'Sarmiento', 'Lionel Messi'],
+      question: '¿Cuál fue una de las claves estratégicas del Cruce de los Andes?',
+      options: [
+        'La superioridad numérica frente al enemigo',
+        'La combinación de logística, abastecimiento y rutas múltiples',
+        'El apoyo de potencias europeas',
+        'La rapidez del cruce sin planificación previa',
+      ],
       correctIndex: 1,
     },
     {

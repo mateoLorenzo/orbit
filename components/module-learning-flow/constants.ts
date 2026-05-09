@@ -41,3 +41,42 @@ export const FIRST_LESSON_NARRATION: LessonNarration = {
     ],
   ],
 }
+
+export const SECOND_LESSON_NARRATION: LessonNarration = {
+  audioSrc: '/audio/lesson-2.mp3',
+  generatingDelayMs: 1600,
+  lines: [
+    [
+      { text: 'San Martín se formó como militar en España', startSeconds: 0.0 },
+      {
+        text: 'y participó en la guerra contra Napoleón antes de regresar a América',
+        startSeconds: 3,
+      },
+      { text: 'para sumarse a la causa independentista.', startSeconds: 6 },
+    ],
+    [
+      { text: 'En Mendoza preparó al Ejército de los Andes,', startSeconds: 8 },
+      {
+        text: 'una fuerza disciplinada que integró a soldados criollos, indígenas',
+        startSeconds: 11,
+      },
+      { text: 'y libertos.', startSeconds: 14 },
+    ],
+    [
+      { text: 'Su liderazgo combinó estrategia militar', startSeconds: 16 },
+      {
+        text: 'con un fuerte sentido de continentalidad:',
+        startSeconds: 19,
+      },
+      { text: 'la libertad de un país no estaba completa sin la del resto.', startSeconds: 22 },
+    ],
+    [
+      { text: 'Tras cruzar los Andes,', startSeconds: 25 },
+      {
+        text: 'lideró las campañas que liberaron Chile',
+        startSeconds: 27.5,
+      },
+      { text: 'y prepararon la independencia de Perú.', startSeconds: 30 },
+    ],
+  ],
+}

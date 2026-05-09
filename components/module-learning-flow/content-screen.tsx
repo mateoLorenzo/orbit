@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Pause, Play, RotateCcw, Sparkles } from 'lucide-react'
+import { Pause, Play, RotateCcw } from 'lucide-react'
 import { IconButton, PrimaryButton, SecondaryButton } from './primitives'
 import type { ContentStep, LessonNarration, NarratedLine } from './types'
 import { useNarrationAudio } from './use-narration-audio'
@@ -9,7 +9,6 @@ import { useNarrationAudio } from './use-narration-audio'
 interface ContentScreenProps {
   step: ContentStep
   voice: string
-  onChangeVoice: () => void
   onBack: () => void
   onNext: () => void
   narration?: LessonNarration
@@ -48,7 +47,6 @@ function VoicePanel({
   subtitleEnabled,
   isGenerating,
   playState,
-  onChangeVoice,
   onTogglePlayback,
   onRestartPlayback,
 }: {
@@ -56,7 +54,6 @@ function VoicePanel({
   subtitleEnabled: boolean
   isGenerating: boolean
   playState: 'playing' | 'paused' | 'stopped'
-  onChangeVoice: () => void
   onTogglePlayback: () => void
   onRestartPlayback: () => void
 }) {
@@ -103,12 +100,6 @@ function VoicePanel({
             />
           </>
         ) : null}
-
-        <IconButton
-          onClick={onChangeVoice}
-          label="Cambiar voz"
-          icon={<Sparkles className="size-4" strokeWidth={2} />}
-        />
       </div>
     </div>
   )
@@ -126,13 +117,17 @@ function ContentText({
   getRevealedLines: (paragraphIndex: number) => number
 }) {
   const fadedAfter = 1
+  const narrationOffset = paragraphs.length - narratedLines.length
 
   return (
     <div className="relative flex-1 overflow-hidden p-6">
       <div className="space-y-4 text-[20px] leading-[1.25] font-medium tracking-[-0.5px] text-black">
         {paragraphs.map((paragraph, index) => {
-          const isNarrated = subtitleEnabled && index >= 1 && index <= narratedLines.length
-          const lines = isNarrated ? narratedLines[index - 1] : null
+          const isNarrated =
+            subtitleEnabled &&
+            index >= narrationOffset &&
+            index < narrationOffset + narratedLines.length
+          const lines = isNarrated ? narratedLines[index - narrationOffset] : null
           return (
             <div
               key={index}
@@ -142,7 +137,7 @@ function ContentText({
               {lines ? (
                 <NarratedParagraph
                   lines={lines}
-                  revealedCount={getRevealedLines(index - 1)}
+                  revealedCount={getRevealedLines(index - narrationOffset)}
                 />
               ) : (
                 <p className={index > fadedAfter ? 'text-black/24' : 'text-black'}>
@@ -161,7 +156,6 @@ function ContentText({
 export function ContentScreen({
   step,
   voice,
-  onChangeVoice,
   onBack,
   onNext,
   narration,
@@ -195,7 +189,6 @@ export function ContentScreen({
             subtitleEnabled={subtitleEnabled}
             isGenerating={isGenerating}
             playState={playState}
-            onChangeVoice={onChangeVoice}
             onTogglePlayback={togglePlayback}
             onRestartPlayback={restartPlayback}
           />
