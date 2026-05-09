@@ -14,16 +14,16 @@ interface RoadmapNode {
 
 const NODES: RoadmapNode[] = [
   {
+    id: '2',
+    title: 'El Cruce de los Andes',
+    description: '',
+    duration: '15 min',
+  },
+  {
     id: '1',
     title: 'La Revolución de Mayo',
     description:
       'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
-    duration: '15 min',
-  },
-  {
-    id: '2',
-    title: 'El Cruce de los Andes',
-    description: '',
     duration: '15 min',
   },
   {

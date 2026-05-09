@@ -11,21 +11,21 @@ export const initialSubjects: Subject[] = [
     sources: [],
     content: [
       {
-        id: 'historia-independencia-1',
-        title: 'La Revolución de Mayo',
-        description:
-          'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
-        type: 'clase',
-        status: 'completado',
-        order: 1,
-      },
-      {
         id: 'historia-independencia-2',
         title: 'El Cruce de los Andes',
         description:
           'La estrategia militar y política de José de San Martín para liberar Chile y avanzar sobre el Virreinato del Perú.',
         type: 'clase',
         status: 'en-progreso',
+        order: 1,
+      },
+      {
+        id: 'historia-independencia-1',
+        title: 'La Revolución de Mayo',
+        description:
+          'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
+        type: 'clase',
+        status: 'completado',
         order: 2,
       },
       {
@@ -58,21 +58,21 @@ export const initialSubjects: Subject[] = [
     sources: [],
     content: [
       {
-        id: 'c1',
-        title: 'La Revolución de Mayo',
-        description:
-          'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
-        type: 'clase',
-        status: 'completado',
-        order: 1,
-      },
-      {
         id: 'c2',
         title: 'El Cruce de los Andes',
         description:
           'La estrategia militar y política de José de San Martín para liberar Chile y avanzar sobre el Virreinato del Perú.',
         type: 'clase',
         status: 'en-progreso',
+        order: 1,
+      },
+      {
+        id: 'c1',
+        title: 'La Revolución de Mayo',
+        description:
+          'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
+        type: 'clase',
+        status: 'completado',
         order: 2,
       },
       {
