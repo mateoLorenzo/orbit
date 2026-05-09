@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import type { Subject, Source, ContentNode } from './types'
 import { initialSubjects, subjectColors } from './data'
+import { slugify } from './slug'
 
 interface AppContextType {
   subjects: Subject[]
@@ -23,6 +24,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addSubject = (name: string, description: string, icon: string) => {
     const newSubject: Subject = {
       id: Date.now().toString(),
+      slug: slugify(name),
       name,
       description,
       color: subjectColors[subjects.length % subjectColors.length],

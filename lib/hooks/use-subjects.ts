@@ -20,7 +20,7 @@ export function useCreateSubject() {
     mutationFn: createSubject,
     onSuccess: ({ subject }) => {
       qc.invalidateQueries({ queryKey: qk.subjects() })
-      router.push(`/subjects/${subject.id}`)
+      router.push(`/subjects/${subject.slug}`)
     },
   })
 }

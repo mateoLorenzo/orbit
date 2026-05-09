@@ -22,6 +22,7 @@ export function mapSubjectRow(row: DBSubject): UISubject {
   const h = hash(row.id)
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     description: row.description ?? '',
     color: COLORS[h % COLORS.length],

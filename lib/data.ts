@@ -3,6 +3,7 @@ import type { Subject } from './types'
 export const initialSubjects: Subject[] = [
   {
     id: 'historia-independencia',
+    slug: 'historia-independencia',
     name: 'Historia de los Procesos de Independencia Latinoamericana',
     description: 'Procesos políticos y militares de la independencia latinoamericana',
     color: 'from-amber-500 to-orange-600',
@@ -50,6 +51,7 @@ export const initialSubjects: Subject[] = [
   },
   {
     id: '1',
+    slug: 'historia-procesos-independencia',
     name: 'Historia de los Procesos de Independencia Latinoamericana',
     description: 'Procesos políticos y militares de la independencia latinoamericana',
     color: 'from-amber-500 to-orange-600',
@@ -97,6 +99,7 @@ export const initialSubjects: Subject[] = [
   },
   {
     id: '2',
+    slug: 'fisica-cuantica',
     name: 'Física Cuántica',
     description: 'Introducción a la mecánica cuántica',
     color: 'from-violet-500 to-purple-600',
@@ -135,6 +138,7 @@ export const initialSubjects: Subject[] = [
   },
   {
     id: '3',
+    slug: 'programacion',
     name: 'Programación',
     description: 'Estructuras de datos y algoritmos',
     color: 'from-blue-500 to-cyan-600',
@@ -145,6 +149,7 @@ export const initialSubjects: Subject[] = [
   },
   {
     id: '4',
+    slug: 'historia-del-arte',
     name: 'Historia del Arte',
     description: 'Del Renacimiento al Arte Moderno',
     color: 'from-amber-500 to-orange-600',

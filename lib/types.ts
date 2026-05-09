@@ -1,5 +1,6 @@
 export interface Subject {
   id: string
+  slug: string
   name: string
   description: string
   color: string
