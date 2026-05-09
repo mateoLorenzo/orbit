@@ -4,6 +4,7 @@ import { eq, and, inArray, or } from 'drizzle-orm'
 import { Resource } from 'sst'
 import { getDb, schema } from '../_shared/db'
 import { embed } from '../_shared/voyage'
+import { slugify, uniquifySlug } from '../_shared/slug'
 import { summarizeFile, synthesizeGraph } from './synth'
 
 const sqs = new SQSClient({})
@@ -132,6 +133,8 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     let createdCount = 0
     let updatedCount = 0
 
+    const usedSlugs = new Set<string>(existingNodes.map((n) => n.slug))
+
     for (const [key, synthNode] of synthByTitle) {
       const existing = existingByTitle.get(key)
       if (existing) {
@@ -154,6 +157,8 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         }
         titleToId.set(key, existing.id)
       } else {
+        const slug = uniquifySlug(slugify(synthNode.title), usedSlugs)
+        usedSlugs.add(slug)
         const [created] = await db
           .insert(schema.nodes)
           .values({
@@ -161,6 +166,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
             subjectId,
             title: synthNode.title,
             contentBrief: synthNode.contentBrief,
+            slug,
           })
           .returning({ id: schema.nodes.id })
         titleToId.set(key, created.id)

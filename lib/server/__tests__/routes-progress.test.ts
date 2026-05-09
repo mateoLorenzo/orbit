@@ -25,6 +25,7 @@ const fakeSubject = {
   userId: 'demo',
   name: 'A',
   description: null,
+  slug: 'a',
   lastUploadAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),

@@ -1,6 +1,7 @@
 import { eq, desc, and } from 'drizzle-orm'
 import { db, schema } from './client'
 import { CURRENT_USER_ID } from '@/lib/auth/current-user'
+import { slugify, uniquifySlug } from '@/lib/slug'
 
 // MVP has no auth. All server-side reads/writes use this user_id and the
 // service-role connection (bypassing RLS). Replace with real auth.uid()
@@ -16,12 +17,16 @@ export async function listSubjects() {
 }
 
 export async function createSubject(input: { name: string; description?: string | null }) {
+  const base = slugify(input.name)
+  const existing = await db.select({ slug: schema.subjects.slug }).from(schema.subjects)
+  const slug = uniquifySlug(base, new Set(existing.map((r) => r.slug)))
   const [row] = await db
     .insert(schema.subjects)
     .values({
       userId: DEMO_USER_ID,
       name: input.name,
       description: input.description ?? null,
+      slug,
     })
     .returning()
   return row
@@ -32,6 +37,15 @@ export async function getSubject(id: string) {
     .select()
     .from(schema.subjects)
     .where(and(eq(schema.subjects.id, id), eq(schema.subjects.userId, DEMO_USER_ID)))
+    .limit(1)
+  return row ?? null
+}
+
+export async function getSubjectBySlug(slug: string) {
+  const [row] = await db
+    .select()
+    .from(schema.subjects)
+    .where(and(eq(schema.subjects.slug, slug), eq(schema.subjects.userId, DEMO_USER_ID)))
     .limit(1)
   return row ?? null
 }
@@ -180,6 +194,7 @@ export async function listNodesWithProgress(subjectId: string) {
     .select({
       id: schema.nodes.id,
       pathId: schema.nodes.pathId,
+      slug: schema.nodes.slug,
       title: schema.nodes.title,
       contentBrief: schema.nodes.contentBrief,
       progressStatus: schema.progress.status,
@@ -290,6 +305,15 @@ export async function deleteFile(subjectId: string, fileId: string) {
   if (!row) return null
   await db.delete(schema.files).where(eq(schema.files.id, fileId))
   return row // caller uses row.s3Key to delete from S3
+}
+
+export async function getNodeBySlug(subjectId: string, nodeSlug: string) {
+  const [row] = await db
+    .select()
+    .from(schema.nodes)
+    .where(and(eq(schema.nodes.subjectId, subjectId), eq(schema.nodes.slug, nodeSlug)))
+    .limit(1)
+  return row ?? null
 }
 
 export async function getStats() {

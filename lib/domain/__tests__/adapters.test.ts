@@ -8,6 +8,7 @@ describe('mapSubjectRow', () => {
       userId: 'u',
       name: 'Historia',
       description: 'desc',
+      slug: 'historia',
       lastUploadAt: null,
       createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
@@ -23,7 +24,7 @@ describe('mapSubjectRow', () => {
   })
 
   it('handles null description', () => {
-    const row = { id: 'x', userId: 'u', name: 'X', description: null, lastUploadAt: null,
+    const row = { id: 'x', userId: 'u', name: 'X', description: null, slug: 'x', lastUploadAt: null,
                   createdAt: new Date(), updatedAt: new Date() }
     const ui = mapSubjectRow(row)
     expect(ui.description).toBe('')

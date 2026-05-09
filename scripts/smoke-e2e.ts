@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { db, schema } from '../lib/db/client'
 import { presignUpload } from '../lib/aws/s3'
 import { DEMO_USER_ID } from '../lib/db/queries'
+import { slugify } from '../lib/slug'
 
 const PDF_PATH = process.argv[2]
 const TIMEOUT_MS = 180_000
@@ -18,12 +19,14 @@ async function main() {
   console.log(`Loaded PDF: ${PDF_PATH} (${pdfBytes.length} bytes)`)
 
   // 1. Create subject
+  const subjectName = `E2E ${new Date().toISOString()}`
   const [subject] = await db
     .insert(schema.subjects)
     .values({
       userId: DEMO_USER_ID,
-      name: `E2E ${new Date().toISOString()}`,
+      name: subjectName,
       description: 'smoke test',
+      slug: `${slugify(subjectName)}-${randomUUID().slice(0, 8)}`,
     })
     .returning()
   console.log(`✓ created subject ${subject.id}`)
