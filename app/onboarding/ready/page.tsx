@@ -1,21 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { motion, type Variants } from 'motion/react'
 import { Check } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
-
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.7, ease: EASE } },
-}
-
-const FADE_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
-}
 
 export default function OnboardingReadyPage() {
   return (
@@ -24,26 +11,24 @@ export default function OnboardingReadyPage() {
       variant="fade-slow"
       className="bg-orange-corners relative flex flex-1 items-center justify-center overflow-hidden"
     >
-      <motion.div
-        variants={FADE_CONTAINER}
-        initial="hidden"
-        animate="visible"
-        className="flex w-full max-w-md flex-col items-center gap-8 px-6 text-center"
-      >
-        <motion.div variants={FADE_CHILD}>
+      <div className="flex w-full max-w-md flex-col items-center gap-8 px-6 text-center">
+        <div className="animate-in fade-in zoom-in-95 duration-700">
           <CheckIcon />
-        </motion.div>
+        </div>
 
-        <motion.h1
-          variants={FADE_CHILD}
-          className="text-[44px] font-semibold leading-[1.1] tracking-[-1.2px]"
-        >
-          <span className="block text-[#FF5C00]">¡Bien hecho!</span>
-          <span className="block text-black">Ya podes comenzar</span>
-          <span className="block text-black">a aprender</span>
-        </motion.h1>
+        <h1 className="text-[44px] font-semibold leading-[1.1] tracking-[-1.2px]">
+          <span className="block text-[#FF5C00] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
+            ¡Bien hecho!
+          </span>
+          <span className="block text-black animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+            Ya podes comenzar
+          </span>
+          <span className="block text-black animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-backwards">
+            a aprender
+          </span>
+        </h1>
 
-        <motion.div variants={FADE_CHILD} className="flex w-full flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-700 fill-mode-backwards">
           <Link
             href="/subjects/1/lessons/c2"
             className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#FF5C00] px-5 text-base font-medium tracking-[-0.32px] text-white shadow-[0_8px_24px_-12px_rgba(255,92,0,0.6)] transition-[transform,filter] hover:brightness-110 hover:-translate-y-px"
@@ -56,8 +41,8 @@ export default function OnboardingReadyPage() {
           >
             Ir a Mis materias
           </Link>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </PageTransition>
   )
 }
