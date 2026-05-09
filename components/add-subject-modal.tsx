@@ -34,8 +34,11 @@ export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+      <div
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+        className="absolute inset-0 cursor-pointer bg-background/80 backdrop-blur-sm"
         onClick={onClose}
       />
       
