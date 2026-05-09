@@ -54,24 +54,69 @@ export function buildSteps(node: ContentNode): Step[] {
       correctIndex: 1,
     },
     {
-      kind: 'content',
-      image: '/learning-landscape.png',
-      video: '/SanMartinAndes.mp4',
-      paragraphs: [
-        'El cruce permitió sorprender al ejército realista en Chacabuco, batalla decisiva que abrió las puertas de Santiago de Chile.',
-        'Esta victoria reorganizó el equilibrio militar en el sur del continente y debilitó al poder español en el Pacífico.',
-        'A partir de allí, el plan continental siguió avanzando hacia el Perú, donde se dio el último golpe definitivo al sistema colonial.',
-        'El cruce de los Andes se convirtió en un símbolo de planificación, disciplina y voluntad colectiva en la historia americana.',
+      kind: 'timeline',
+      topic: 'El Cruce de los Andes y el proyecto continental de San Martín',
+      title: 'El Cruce de los Andes',
+      subtitle: 'El plan continental de San Martín',
+      intro:
+        'Recorré la secuencia de hechos que hicieron posible la liberación de Chile y el avance hacia el Perú.',
+      events: [
+        {
+          id: 'preparacion-mendoza',
+          date: '1814–1816',
+          title: 'Preparación del Ejército de los Andes en Mendoza',
+          description:
+            'San Martín asume el gobierno de Cuyo y dedica casi dos años a preparar un ejército disciplinado en Mendoza, organizando producción de armas, vestuario y víveres.',
+          historicalImpact:
+            'La preparación logística minuciosa fue la base que permitió todo lo que vino después: sin esa estructura, el cruce no era viable.',
+        },
+        {
+          id: 'cruce-andes',
+          date: 'Enero–Febrero 1817',
+          title: 'Cruce de los Andes',
+          description:
+            'El Ejército de los Andes cruza la cordillera por seis pasos distintos para confundir al enemigo realista, en una marcha de cerca de tres semanas.',
+          historicalImpact:
+            'Logró el factor sorpresa y dejó al ejército realista descolocado, abriendo la posibilidad de una victoria rápida en Chile.',
+        },
+        {
+          id: 'batalla-chacabuco',
+          date: '12 de febrero de 1817',
+          title: 'Batalla de Chacabuco',
+          description:
+            'Tras descender de los Andes, el ejército patriota derrota a las fuerzas realistas en la batalla de Chacabuco.',
+          historicalImpact:
+            'El triunfo confirmó la efectividad del plan y permitió avanzar de inmediato sobre Santiago, capital del Reino de Chile.',
+        },
+        {
+          id: 'entrada-santiago',
+          date: '14 de febrero de 1817',
+          title: 'Entrada a Santiago de Chile',
+          description:
+            'El ejército ingresa a Santiago y se instala un gobierno independiente, con O’Higgins como Director Supremo.',
+          historicalImpact:
+            'Chile queda fuera del control español y se convierte en base operativa para la siguiente fase del plan continental.',
+        },
+        {
+          id: 'plan-peru',
+          date: '1820–1822',
+          title: 'Continuación del plan continental hacia Perú',
+          description:
+            'Con Chile asegurado, San Martín organiza la Expedición Libertadora del Perú y desembarca en Paracas en 1820.',
+          historicalImpact:
+            'El avance al Perú apuntaba al corazón del poder colonial español en Sudamérica, completando la lógica del proyecto continental.',
+        },
       ],
     },
     {
       kind: 'quiz',
-      question: '¿Cuál fue el principal resultado político del cruce?',
+      question:
+        '¿Por qué la preparación en Mendoza fue determinante para el éxito posterior en Chacabuco y la entrada a Santiago?',
       options: [
-        'La consolidación del virreinato',
-        'La liberación de Chile y el avance hacia Perú',
-        'La firma de un armisticio con España',
-        'La pérdida de Mendoza',
+        'Porque permitió firmar una alianza militar con potencias europeas antes del cruce.',
+        'Porque garantizó la logística, disciplina y abastecimiento que hicieron viables el cruce y la victoria inmediata.',
+        'Porque obligó a los realistas a rendirse antes de que comenzara el cruce.',
+        'Porque reemplazó la necesidad de combatir en Chile gracias a un acuerdo diplomático.',
       ],
       correctIndex: 1,
     },
