@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion, type Variants } from 'motion/react'
 import { ArrowRight, Check, Video } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
 
@@ -21,18 +20,6 @@ const LEVELS: Level[] = [
   { id: 'particular', label: 'Particular' },
 ]
 
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const STAGGER_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
-}
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5, ease: EASE } },
-}
-
 export default function OnboardingLevelPage() {
   const router = useRouter()
   const [selected, setSelected] = useState<string | null>(null)
@@ -45,40 +32,25 @@ export default function OnboardingLevelPage() {
   return (
     <PageTransition pageKey="onboarding-level" variant="fade" className="flex flex-1 flex-col">
       <div className="flex flex-1 flex-col">
-        <motion.div
-          variants={STAGGER_CONTAINER}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16"
-        >
-          <motion.h1
-            variants={FADE_CHILD}
-            className="text-center text-[40px] font-semibold leading-[1.1] tracking-[-0.8px] text-black"
-          >
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16">
+          <h1 className="text-center text-[40px] font-semibold leading-[1.1] tracking-[-0.8px] text-black animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
             ¿Qué estás estudiando?
-          </motion.h1>
+          </h1>
 
-          <motion.div
-            variants={FADE_CHILD}
-            className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2"
-          >
-            {LEVELS.map((level) => (
+          <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {LEVELS.map((level, i) => (
               <LevelCard
                 key={level.id}
                 level={level}
                 selected={selected === level.id}
                 onSelect={() => setSelected(level.id)}
+                animationDelay={i * 70 + 250}
               />
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
-          className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-8"
-        >
+        <footer className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-8 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-700 fill-mode-backwards">
           <Link
             href="/onboarding/career"
             className="inline-flex h-11 items-center rounded-lg border border-black/12 bg-white px-4 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-black/4"
@@ -95,7 +67,7 @@ export default function OnboardingLevelPage() {
             Continuar
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </button>
-        </motion.footer>
+        </footer>
       </div>
     </PageTransition>
   )
@@ -105,18 +77,20 @@ interface LevelCardProps {
   level: Level
   selected: boolean
   onSelect: () => void
+  animationDelay: number
 }
 
-function LevelCard({ level, selected, onSelect }: LevelCardProps) {
+function LevelCard({ level, selected, onSelect, animationDelay }: LevelCardProps) {
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`group relative flex flex-col items-start gap-12 rounded-xl bg-white p-5 text-left transition-[border-color,box-shadow] ${
+      style={{ animationDelay: `${animationDelay}ms` }}
+      className={`group relative flex flex-col items-start gap-12 rounded-xl border-2 bg-white p-5 text-left transition-[border-color,box-shadow] [transition-duration:200ms] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-backwards ${
         selected
-          ? 'border-2 border-black shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)]'
-          : 'border border-black/8 hover:border-black/20'
+          ? 'border-black shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)]'
+          : 'border-black/8 hover:border-black/20'
       }`}
     >
       <div className="flex size-12 items-center justify-center rounded-lg bg-black">
@@ -128,16 +102,22 @@ function LevelCard({ level, selected, onSelect }: LevelCardProps) {
           {level.label}
         </span>
 
-        {selected ? (
-          <span className="flex size-7 items-center justify-center rounded-full bg-black text-white">
+        <span
+          className={`flex size-7 shrink-0 items-center justify-center rounded-full transition-colors [transition-duration:200ms] ${
+            selected
+              ? 'bg-black text-white'
+              : 'bg-transparent text-black/40 group-hover:text-black/70'
+          }`}
+        >
+          {selected ? (
             <Check className="size-4" strokeWidth={3} />
-          </span>
-        ) : (
-          <ArrowRight
-            className="size-5 text-black/40 transition-transform group-hover:translate-x-0.5 group-hover:text-black/70"
-            strokeWidth={2}
-          />
-        )}
+          ) : (
+            <ArrowRight
+              className="size-5 transition-transform group-hover:translate-x-0.5"
+              strokeWidth={2}
+            />
+          )}
+        </span>
       </div>
     </button>
   )
