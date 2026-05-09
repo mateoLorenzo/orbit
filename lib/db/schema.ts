@@ -24,6 +24,21 @@ export const fileType = pgEnum('file_type', ['pdf', 'doc', 'image', 'audio', 'vi
 export const nodeStatus = pgEnum('node_status', ['active', 'archived'])
 export const contentStatus = pgEnum('content_status', ['generating', 'ready', 'failed', 'stale'])
 
+export const progressStatus = pgEnum('progress_status', [
+  'bloqueado',
+  'disponible',
+  'en_curso',
+  'dominado',
+])
+
+export const formatoPreferido = pgEnum('formato_preferido', [
+  'texto',
+  'audio',
+  'video',
+  'visual',
+  'podcast',
+])
+
 export const subjects = pgTable(
   'subjects',
   {
@@ -178,6 +193,41 @@ export const nodeContent = pgTable(
   ],
 )
 
+export const progress = pgTable(
+  'progress',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => authUsers.id, { onDelete: 'cascade' }),
+    nodeId: uuid('node_id')
+      .notNull()
+      .references(() => nodes.id, { onDelete: 'cascade' }),
+    status: progressStatus('status').notNull().default('disponible'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('progress_user_node_unique').on(t.userId, t.nodeId),
+    index('idx_progress_user_status').on(t.userId, t.status),
+    index('idx_progress_node').on(t.nodeId),
+  ],
+)
+
+export const profiles = pgTable('profiles', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => authUsers.id, { onDelete: 'cascade' }),
+  formatoPreferido: formatoPreferido('formato_preferido').notNull().default('texto'),
+  horariosActivos: text('horarios_activos').array().notNull().default(sql`'{}'::text[]`),
+  erroresRecurrentes: text('errores_recurrentes')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  friccionPromedio: integer('friccion_promedio').notNull().default(50),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type Subject = typeof subjects.$inferSelect
 export type NewSubject = typeof subjects.$inferInsert
 export type FileRow = typeof files.$inferSelect
@@ -188,3 +238,7 @@ export type Path = typeof paths.$inferSelect
 export type Node = typeof nodes.$inferSelect
 export type NodeEdge = typeof nodeEdges.$inferSelect
 export type NodeContent = typeof nodeContent.$inferSelect
+export type Progress = typeof progress.$inferSelect
+export type NewProgress = typeof progress.$inferInsert
+export type Profile = typeof profiles.$inferSelect
+export type NewProfile = typeof profiles.$inferInsert

@@ -66,3 +66,106 @@ export async function insertPendingFile(input: {
     .returning()
   return row
 }
+
+// --- Progress ---
+
+export async function listProgressForSubject(subjectId: string) {
+  return db
+    .select({
+      id: schema.progress.id,
+      nodeId: schema.progress.nodeId,
+      status: schema.progress.status,
+      completedAt: schema.progress.completedAt,
+      updatedAt: schema.progress.updatedAt,
+    })
+    .from(schema.progress)
+    .innerJoin(schema.nodes, eq(schema.nodes.id, schema.progress.nodeId))
+    .where(
+      and(
+        eq(schema.progress.userId, DEMO_USER_ID),
+        eq(schema.nodes.subjectId, subjectId),
+      ),
+    )
+}
+
+export interface ProgressSummary {
+  total: number
+  dominado: number
+  enCurso: number
+  disponible: number
+  bloqueado: number
+  percentDominado: number
+}
+
+export async function summarizeProgressForSubject(subjectId: string): Promise<ProgressSummary> {
+  const rows = await listProgressForSubject(subjectId)
+  const counts = {
+    total: rows.length,
+    dominado: rows.filter((r) => r.status === 'dominado').length,
+    enCurso: rows.filter((r) => r.status === 'en_curso').length,
+    disponible: rows.filter((r) => r.status === 'disponible').length,
+    bloqueado: rows.filter((r) => r.status === 'bloqueado').length,
+  }
+  const percentDominado =
+    counts.total === 0 ? 0 : Math.round((counts.dominado / counts.total) * 100)
+  return { ...counts, percentDominado }
+}
+
+export async function upsertNodeProgress(
+  nodeId: string,
+  status: typeof schema.progressStatus.enumValues[number],
+) {
+  const completedAt = status === 'dominado' ? new Date() : null
+  const [row] = await db
+    .insert(schema.progress)
+    .values({
+      userId: DEMO_USER_ID,
+      nodeId,
+      status,
+      completedAt,
+    })
+    .onConflictDoUpdate({
+      target: [schema.progress.userId, schema.progress.nodeId],
+      set: {
+        status,
+        completedAt,
+        updatedAt: new Date(),
+      },
+    })
+    .returning()
+  return row
+}
+
+// --- Profile ---
+
+export async function getProfile() {
+  const [row] = await db
+    .select()
+    .from(schema.profiles)
+    .where(eq(schema.profiles.userId, DEMO_USER_ID))
+    .limit(1)
+  if (row) return row
+
+  // Auto-seed the singleton on first read.
+  const [seed] = await db
+    .insert(schema.profiles)
+    .values({ userId: DEMO_USER_ID })
+    .returning()
+  return seed
+}
+
+export async function updateProfile(input: {
+  formatoPreferido?: typeof schema.formatoPreferido.enumValues[number]
+  horariosActivos?: string[]
+  erroresRecurrentes?: string[]
+  friccionPromedio?: number
+}) {
+  // Ensure singleton exists
+  await getProfile()
+  const [row] = await db
+    .update(schema.profiles)
+    .set({ ...input, updatedAt: new Date() })
+    .where(eq(schema.profiles.userId, DEMO_USER_ID))
+    .returning()
+  return row
+}
