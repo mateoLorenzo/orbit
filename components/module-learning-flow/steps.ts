@@ -111,12 +111,12 @@ export function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'quiz',
       question:
-        '¿Por qué la preparación en Mendoza fue determinante para el éxito posterior en Chacabuco y la entrada a Santiago?',
+        'Según la línea de tiempo, ¿qué hecho ocurrió apenas dos días después de la Batalla de Chacabuco?',
       options: [
-        'Porque permitió firmar una alianza militar con potencias europeas antes del cruce.',
-        'Porque garantizó la logística, disciplina y abastecimiento que hicieron viables el cruce y la victoria inmediata.',
-        'Porque obligó a los realistas a rendirse antes de que comenzara el cruce.',
-        'Porque reemplazó la necesidad de combatir en Chile gracias a un acuerdo diplomático.',
+        'El inicio de la preparación del Ejército de los Andes en Mendoza.',
+        'La entrada a Santiago de Chile y la instalación de un gobierno independiente con O’Higgins como Director Supremo.',
+        'El desembarco de la Expedición Libertadora del Perú en Paracas.',
+        'El cruce de los Andes por seis pasos distintos para confundir al enemigo realista.',
       ],
       correctIndex: 1,
     },
