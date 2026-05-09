@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Pause, Play, RotateCcw, Sparkles } from 'lucide-react'
+import { Pause, Play, RotateCcw } from 'lucide-react'
 import { IconButton, PrimaryButton, SecondaryButton } from './primitives'
 import type { ContentStep, LessonNarration, NarratedLine } from './types'
 import { useNarrationAudio } from './use-narration-audio'
@@ -10,7 +10,6 @@ import { useNarrationAudio } from './use-narration-audio'
 interface ContentScreenProps {
   step: ContentStep
   voice: string
-  onChangeVoice: () => void
   onBack: () => void
   onNext: () => void
   narration?: LessonNarration
@@ -31,9 +30,8 @@ function NarratedParagraph({
         {lines.map((line, index) => (
           <span
             key={index}
-            className={`transition-colors duration-500 ${
-              index < revealedCount ? 'text-black' : 'text-black/24'
-            }`}
+            className={`transition-colors duration-500 ${index < revealedCount ? 'text-black' : 'text-black/24'
+              }`}
           >
             {line.text}
             {index < lines.length - 1 ? ' ' : ''}
@@ -49,7 +47,6 @@ function VoicePanel({
   subtitleEnabled,
   isGenerating,
   playState,
-  onChangeVoice,
   onTogglePlayback,
   onRestartPlayback,
 }: {
@@ -57,7 +54,6 @@ function VoicePanel({
   subtitleEnabled: boolean
   isGenerating: boolean
   playState: 'playing' | 'paused' | 'stopped'
-  onChangeVoice: () => void
   onTogglePlayback: () => void
   onRestartPlayback: () => void
 }) {
@@ -104,12 +100,6 @@ function VoicePanel({
             />
           </>
         ) : null}
-
-        <IconButton
-          onClick={onChangeVoice}
-          label="Cambiar voz"
-          icon={<Sparkles className="size-4" strokeWidth={2} />}
-        />
       </div>
     </div>
   )
@@ -127,13 +117,17 @@ function ContentText({
   getRevealedLines: (paragraphIndex: number) => number
 }) {
   const fadedAfter = 1
+  const narrationOffset = paragraphs.length - narratedLines.length
 
   return (
     <div className="relative flex-1 overflow-hidden p-6">
       <div className="space-y-4 text-[20px] leading-[1.25] font-medium tracking-[-0.5px] text-black">
         {paragraphs.map((paragraph, index) => {
-          const isNarrated = subtitleEnabled && index >= 1 && index <= narratedLines.length
-          const lines = isNarrated ? narratedLines[index - 1] : null
+          const isNarrated =
+            subtitleEnabled &&
+            index >= narrationOffset &&
+            index < narrationOffset + narratedLines.length
+          const lines = isNarrated ? narratedLines[index - narrationOffset] : null
           return (
             <div
               key={index}
@@ -143,7 +137,7 @@ function ContentText({
               {lines ? (
                 <NarratedParagraph
                   lines={lines}
-                  revealedCount={getRevealedLines(index - 1)}
+                  revealedCount={getRevealedLines(index - narrationOffset)}
                 />
               ) : (
                 <p className={index > fadedAfter ? 'text-black/24' : 'text-black'}>
@@ -162,7 +156,6 @@ function ContentText({
 export function ContentScreen({
   step,
   voice,
-  onChangeVoice,
   onBack,
   onNext,
   narration,
@@ -182,23 +175,20 @@ export function ContentScreen({
 
   return (
     <div
-      className={`flex min-h-0 flex-1 flex-col transition-[gap,padding] duration-500 ${
-        isImmersive ? 'gap-0 p-0' : 'gap-6 px-6 py-6'
-      }`}
+      className={`flex min-h-0 flex-1 flex-col transition-[gap,padding] duration-500 ${isImmersive ? 'gap-0 p-0' : 'gap-6 px-6 py-6'
+        }`}
     >
       <audio ref={audioRef} src={audioSrc} preload="auto" className="hidden" />
 
       <div
-        className={`flex min-h-0 flex-1 flex-col lg:flex-row transition-[gap] duration-500 ${
-          isImmersive ? 'gap-0' : 'gap-6'
-        }`}
+        className={`flex min-h-0 flex-1 flex-col lg:flex-row transition-[gap] duration-500 ${isImmersive ? 'gap-0' : 'gap-6'
+          }`}
       >
         <div
-          className={`flex min-h-0 flex-col overflow-hidden rounded-xl bg-white transition-[width,opacity] duration-500 animate-in fade-in slide-in-from-left-4 ${
-            isImmersive
+          className={`flex min-h-0 flex-col overflow-hidden rounded-xl bg-white transition-[width,opacity] duration-500 animate-in fade-in slide-in-from-left-4 ${isImmersive
               ? 'lg:w-0 lg:opacity-0 lg:invisible'
               : 'lg:w-[420px] lg:opacity-100'
-          } lg:shrink-0`}
+            } lg:shrink-0`}
           aria-hidden={isImmersive}
         >
           <ContentText
@@ -212,7 +202,6 @@ export function ContentScreen({
             subtitleEnabled={subtitleEnabled}
             isGenerating={isGenerating}
             playState={playState}
-            onChangeVoice={onChangeVoice}
             onTogglePlayback={togglePlayback}
             onRestartPlayback={restartPlayback}
           />
@@ -223,14 +212,33 @@ export function ContentScreen({
             isImmersive ? 'rounded-none' : 'rounded-xl'
           }`}
         >
-          <Image
-            src={step.image}
-            alt="Ilustración del tema"
-            fill
-            sizes="(min-width: 1024px) 60vw, 100vw"
-            className="object-cover"
-            priority
-          />
+          {step.video ? (
+            <video
+              key={step.video}
+              src={step.video}
+              poster={step.image}
+              autoPlay
+              loop={step.videoLoop !== false}
+              muted
+              playsInline
+              onEnded={(e) => {
+                // Park on the last frame instead of resetting / showing controls
+                const v = e.currentTarget
+                v.pause()
+                v.currentTime = Math.max(0, v.duration - 0.001)
+              }}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <Image
+              src={step.image}
+              alt="Ilustración del tema"
+              fill
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          )}
 
           <div
             className={`pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/45 to-transparent transition-opacity duration-500 ${
@@ -259,9 +267,8 @@ export function ContentScreen({
       </div>
 
       <div
-        className={`flex items-center gap-6 overflow-hidden transition-[max-height,opacity] duration-500 ${
-          isImmersive ? 'pointer-events-none max-h-0 opacity-0' : 'max-h-32 opacity-100'
-        }`}
+        className={`flex items-center gap-6 overflow-hidden transition-[max-height,opacity] duration-500 ${isImmersive ? 'pointer-events-none max-h-0 opacity-0' : 'max-h-32 opacity-100'
+          }`}
         aria-hidden={isImmersive}
       >
         <SecondaryButton onClick={onBack}>Volver</SecondaryButton>

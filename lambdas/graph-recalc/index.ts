@@ -1,13 +1,8 @@
 import type { SQSEvent, SQSHandler } from 'aws-lambda'
-import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs'
 import { eq, and, inArray, or } from 'drizzle-orm'
-import { Resource } from 'sst'
 import { getDb, schema } from '../_shared/db'
 import { embed } from '../_shared/voyage'
 import { summarizeFile, synthesizeGraph } from './synth'
-
-const sqs = new SQSClient({})
-const DEBOUNCE_MS = 30_000
 
 interface RecalcPayload {
   subjectId: string
@@ -36,23 +31,6 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       .limit(1)
     if (!subject) {
       console.warn('graph-recalc: subject not found', { subjectId })
-      continue
-    }
-
-    if (
-      subject.lastUploadAt &&
-      Date.now() - subject.lastUploadAt.getTime() < DEBOUNCE_MS
-    ) {
-      console.log('graph-recalc: debouncing — re-enqueue with delay', { subjectId })
-      await sqs.send(
-        new SendMessageCommand({
-          QueueUrl: Resource.GraphRecalcQueue.url,
-          MessageBody: JSON.stringify(payload),
-          MessageGroupId: subjectId,
-          MessageDeduplicationId: `${subjectId}:debounce:${Date.now()}`,
-          DelaySeconds: 30,
-        }),
-      )
       continue
     }
 

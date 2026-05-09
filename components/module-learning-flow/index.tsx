@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { FIRST_LESSON_NARRATION, VOICE_OPTIONS } from './constants'
+import { FIRST_LESSON_NARRATION, SECOND_LESSON_NARRATION, VOICE_OPTIONS } from './constants'
 import { DoneScreen } from './done-screen'
 import { ContentScreen } from './content-screen'
 import { IntroScreen } from './intro-screen'
@@ -20,11 +20,18 @@ export default function ModuleLearningFlow({
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [selections, setSelections] = useState<Record<number, number>>({})
-  const [voiceIndex, setVoiceIndex] = useState(0)
+  const [voiceIndex] = useState(0)
 
   const step = steps[currentStep]
   const isFirstLessonAnimatedSlide =
     currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 4
+  const isSecondLessonAnimatedSlide =
+    currentStep === 3 && step.kind === 'content' && step.paragraphs.length >= 4
+  const lessonNarration = isFirstLessonAnimatedSlide
+    ? FIRST_LESSON_NARRATION
+    : isSecondLessonAnimatedSlide
+      ? SECOND_LESSON_NARRATION
+      : undefined
 
   const totalProgressSteps = steps.filter((item) => item.kind === 'content' || item.kind === 'quiz').length
   const completedProgressSteps = steps
@@ -49,7 +56,6 @@ export default function ModuleLearningFlow({
     else onExit()
   }
 
-  const cycleVoice = () => setVoiceIndex((value) => (value + 1) % VOICE_OPTIONS.length)
   const handleSelect = (index: number) =>
     setSelections((prev) => ({ ...prev, [currentStep]: index }))
 
@@ -73,10 +79,9 @@ export default function ModuleLearningFlow({
           <ContentScreen
             step={step}
             voice={VOICE_OPTIONS[voiceIndex]}
-            onChangeVoice={cycleVoice}
             onBack={goPrev}
             onNext={goNext}
-            narration={isFirstLessonAnimatedSlide ? FIRST_LESSON_NARRATION : undefined}
+            narration={lessonNarration}
           />
         )}
         {step.kind === 'quiz' && (

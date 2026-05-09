@@ -11,6 +11,7 @@ export function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'content',
       image: '/learning-landscape.png',
+      video: '/SanMartinAndes.mp4',
       paragraphs: [
         baseParagraph,
         'San Martín planificó durante años el cruce de los Andes, coordinando logística, abastecimiento y rutas posibles a través de seis pasos diferentes para confundir al enemigo realista.',
@@ -20,13 +21,20 @@ export function buildSteps(node: ContentNode): Step[] {
     },
     {
       kind: 'quiz',
-      question: '¿Quién fue quien pasó la Cordillera de Los Andes?',
-      options: ['Belgrano', 'San Martín', 'Sarmiento', 'Lionel Messi'],
+      question: '¿Cuál fue una de las claves estratégicas del Cruce de los Andes?',
+      options: [
+        'La superioridad numérica frente al enemigo',
+        'La combinación de logística, abastecimiento y rutas múltiples',
+        'El apoyo de potencias europeas',
+        'La rapidez del cruce sin planificación previa',
+      ],
       correctIndex: 1,
     },
     {
       kind: 'content',
       image: '/learning-portrait.png',
+      video: '/Historical.mp4',
+      videoLoop: false,
       paragraphs: [
         'San Martín se formó como militar en España y participó en la guerra contra Napoleón antes de regresar a América para sumarse a la causa independentista.',
         'En Mendoza preparó al Ejército de los Andes, una fuerza disciplinada que integró a soldados criollos, indígenas y libertos.',
@@ -43,6 +51,7 @@ export function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'content',
       image: '/learning-landscape.png',
+      video: '/SanMartinAndes.mp4',
       paragraphs: [
         'El cruce permitió sorprender al ejército realista en Chacabuco, batalla decisiva que abrió las puertas de Santiago de Chile.',
         'Esta victoria reorganizó el equilibrio militar en el sur del continente y debilitó al poder español en el Pacífico.',
