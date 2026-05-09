@@ -3,21 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion, type Variants } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
-
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const STAGGER_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-}
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5, ease: EASE } },
-}
 
 export default function OnboardingCareerPage() {
   const router = useRouter()
@@ -33,21 +20,17 @@ export default function OnboardingCareerPage() {
   return (
     <PageTransition pageKey="onboarding-career" variant="fade" className="flex flex-1 flex-col">
       <div className="flex flex-1 flex-col">
-        <motion.div
-          variants={STAGGER_CONTAINER}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16"
-        >
-          <motion.h1
-            variants={FADE_CHILD}
-            className="text-center text-[40px] font-semibold leading-[1.1] tracking-[-0.8px] text-black"
-          >
-            <span className="block">Para comenzar, asigna</span>
-            <span className="block text-[#FF5C00]">un nombre a tu carrera</span>
-          </motion.h1>
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16">
+          <h1 className="text-center text-[40px] font-semibold leading-[1.1] tracking-[-0.8px] text-black">
+            <span className="block animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
+              Para comenzar, asigna
+            </span>
+            <span className="block text-[#FF5C00] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+              un nombre a tu carrera
+            </span>
+          </h1>
 
-          <motion.div variants={FADE_CHILD} className="mt-12 w-full">
+          <div className="mt-12 w-full animate-in fade-in slide-in-from-bottom-2 duration-700 delay-500 fill-mode-backwards">
             <input
               type="text"
               value={career}
@@ -60,15 +43,10 @@ export default function OnboardingCareerPage() {
               aria-label="Nombre de la carrera"
               className="w-full rounded-2xl bg-white px-8 py-6 text-center text-[22px] font-medium tracking-[-0.5px] text-black shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08)] outline-none transition-shadow placeholder:text-black/35 focus:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.12)]"
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4, ease: EASE }}
-          className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-8"
-        >
+        <footer className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-8 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-700 fill-mode-backwards">
           <Link
             href="/onboarding/upload"
             className="inline-flex h-11 items-center rounded-lg border border-black/12 bg-white px-4 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-black/4"
@@ -85,7 +63,7 @@ export default function OnboardingCareerPage() {
             Continuar
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </button>
-        </motion.footer>
+        </footer>
       </div>
     </PageTransition>
   )

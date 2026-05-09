@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, type Variants } from 'motion/react'
 import { ArrowRight, FileText, Upload, X } from 'lucide-react'
 import PageTransition from '@/components/scaffold/page-transition'
 
@@ -13,17 +12,6 @@ interface UploadedFile {
 }
 
 const ACCEPT = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png'
-const EASE = [0.32, 0.72, 0, 1] as const
-
-const STAGGER_CONTAINER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-}
-
-const FADE_CHILD: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5, ease: EASE } },
-}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -86,30 +74,24 @@ export default function OnboardingUploadPage() {
   return (
     <PageTransition pageKey="onboarding-upload" variant="fade" className="flex flex-1 flex-col">
       <div className="flex flex-1 flex-col">
-        <motion.div
-          variants={STAGGER_CONTAINER}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16"
-        >
-          <motion.div
-            variants={FADE_CHILD}
-            className="flex flex-col items-center gap-3 text-center"
-          >
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pt-16">
+          <div className="flex flex-col items-center gap-3 text-center">
             <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.8px] text-black">
-              Carga todos tus
-              <br />
-              archivos de la materia
+              <span className="block animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
+                Carga todos tus
+              </span>
+              <span className="block animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+                archivos de la materia
+              </span>
             </h1>
-            <p className="max-w-md text-base leading-relaxed text-black/45">
+            <p className="max-w-md text-base leading-relaxed text-black/45 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-450 fill-mode-backwards">
               La IA se encargará de comprenderla y crear contenido personalizado.
               Podrás gestionar todos los documentos cuando quieras.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={FADE_CHILD}
-            className="mt-10 w-full"
+          <div
+            className="mt-10 w-full animate-in fade-in slide-in-from-bottom-2 duration-700 delay-600 fill-mode-backwards"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -184,17 +166,14 @@ export default function OnboardingUploadPage() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {files.length === 0 && (
-            <motion.p
-              variants={FADE_CHILD}
-              className="mt-6 text-center text-sm text-black/40"
-            >
+            <p className="mt-6 text-center text-sm text-black/40 animate-in fade-in duration-700 delay-800 fill-mode-backwards">
               Podrás gestionar todos los documentos cuando quieras.
-            </motion.p>
+            </p>
           )}
-        </motion.div>
+        </div>
 
         <input
           ref={inputRef}
@@ -205,12 +184,7 @@ export default function OnboardingUploadPage() {
           onChange={handleInputChange}
         />
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
-          className="mx-auto flex w-full max-w-3xl items-center justify-center px-6 py-8"
-        >
+        <footer className="mx-auto flex w-full max-w-3xl items-center justify-center px-6 py-8 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-900 fill-mode-backwards">
           <button
             type="button"
             onClick={handleContinue}
@@ -219,7 +193,7 @@ export default function OnboardingUploadPage() {
             Continuar
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </button>
-        </motion.footer>
+        </footer>
       </div>
     </PageTransition>
   )

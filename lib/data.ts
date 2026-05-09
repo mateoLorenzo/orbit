@@ -51,100 +51,49 @@ export const initialSubjects: Subject[] = [
   {
     id: '1',
     name: 'Historia de los Procesos de Independencia Latinoamericana',
-    description: 'Cálculo diferencial e integral',
-    color: 'from-emerald-500 to-teal-600',
-    icon: 'ruler',
+    description: 'Procesos políticos y militares de la independencia latinoamericana',
+    color: 'from-amber-500 to-orange-600',
+    icon: 'palette',
     createdAt: new Date('2024-01-15'),
-    sources: [
-      {
-        id: 's1',
-        name: 'Cálculo-Tomo1.pdf',
-        type: 'pdf',
-        size: '15.2 MB',
-        uploadedAt: new Date('2024-01-16'),
-        status: 'ready'
-      },
-      {
-        id: 's2',
-        name: 'Ejercicios-Integrales.pdf',
-        type: 'pdf',
-        size: '8.4 MB',
-        uploadedAt: new Date('2024-01-17'),
-        status: 'ready'
-      }
-    ],
+    sources: [],
     content: [
       {
         id: 'c1',
-        title: 'Límites y Continuidad',
-        description: 'Conceptos fundamentales de límites, propiedades y aplicaciones',
-        type: 'tema',
+        title: 'La Revolución de Mayo',
+        description:
+          'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
+        type: 'clase',
         status: 'completado',
         order: 1,
-        children: [
-          {
-            id: 'c1-1',
-            title: 'Definición formal de límite',
-            description: 'Definición epsilon-delta',
-            type: 'clase',
-            status: 'completado',
-            order: 1
-          },
-          {
-            id: 'c1-2',
-            title: 'Propiedades de los límites',
-            description: 'Suma, producto, cociente de límites',
-            type: 'clase',
-            status: 'completado',
-            order: 2
-          }
-        ]
       },
       {
         id: 'c2',
-        title: 'Derivadas',
-        description: 'Técnicas de derivación y aplicaciones',
-        type: 'tema',
+        title: 'El Cruce de los Andes',
+        description:
+          'La estrategia militar y política de José de San Martín para liberar Chile y avanzar sobre el Virreinato del Perú.',
+        type: 'clase',
         status: 'en-progreso',
         order: 2,
-        children: [
-          {
-            id: 'c2-1',
-            title: 'Regla de la cadena',
-            description: 'Derivación de funciones compuestas',
-            type: 'clase',
-            status: 'en-progreso',
-            order: 1
-          },
-          {
-            id: 'c2-2',
-            title: 'Derivadas implícitas',
-            description: 'Derivación de ecuaciones implícitas',
-            type: 'clase',
-            status: 'pendiente',
-            order: 2
-          }
-        ]
       },
       {
         id: 'c3',
-        title: 'Integrales',
-        description: 'Integración y sus aplicaciones',
-        type: 'tema',
+        title: 'Las Invasiones Inglesas',
+        description:
+          'El impacto de las invasiones británicas en Buenos Aires y el surgimiento de nuevas identidades políticas.',
+        type: 'clase',
         status: 'pendiente',
         order: 3,
-        children: [
-          {
-            id: 'c3-1',
-            title: 'Integral definida',
-            description: 'Concepto y propiedades',
-            type: 'clase',
-            status: 'pendiente',
-            order: 1
-          }
-        ]
-      }
-    ]
+      },
+      {
+        id: 'c4',
+        title: 'La Asamblea del Año XIII',
+        description:
+          'Las primeras iniciativas para organizar políticamente las Provincias Unidas y consolidar la independencia.',
+        type: 'clase',
+        status: 'pendiente',
+        order: 4,
+      },
+    ],
   },
   {
     id: '2',

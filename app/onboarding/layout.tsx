@@ -26,9 +26,9 @@ export default function OnboardingLayout({ children }: { children: ReactNode }) 
   const progress = idx >= 0 ? ((idx + 1) / PROGRESS_STEPS.length) * 100 : 0
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f8f8]">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8]">
       {!isFullBleed && (
-        <header>
+        <header className="shrink-0">
           <div className="flex h-14 items-center justify-center">
             <span className="text-base font-medium tracking-[-0.32px] text-black">
               Nueva materia
@@ -45,7 +45,7 @@ export default function OnboardingLayout({ children }: { children: ReactNode }) 
           </div>
         </header>
       )}
-      <main className="flex flex-1 flex-col">
+      <main className="flex flex-1 flex-col overflow-hidden">
         <AnimatePresence mode="wait">{children}</AnimatePresence>
       </main>
     </div>
