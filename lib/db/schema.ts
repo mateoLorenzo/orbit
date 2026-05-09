@@ -219,6 +219,8 @@ export const profiles = pgTable('profiles', {
     .primaryKey()
     .references(() => authUsers.id, { onDelete: 'cascade' }),
   preferredFormat: preferredFormat('preferred_format').notNull().default('text'),
+  displayName: text('display_name'),
+  interests: text('interests').array().notNull().default(sql`'{}'::text[]`),
   activeHours: text('active_hours').array().notNull().default(sql`'{}'::text[]`),
   recurringMistakes: text('recurring_mistakes')
     .array()
