@@ -13,6 +13,7 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "backfill:slugs": "tsx --env-file=.env.local scripts/backfill-slugs.ts",
     "smoke:db": "tsx --env-file=.env.local scripts/smoke-db.ts",
     "smoke:e2e": "bash scripts/with-aws.sh tsx --env-file=.env.local scripts/smoke-e2e.ts",
     "smoke:voyage": "tsx --env-file=.env.local scripts/smoke-voyage.ts"
