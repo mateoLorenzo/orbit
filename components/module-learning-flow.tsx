@@ -16,6 +16,7 @@ interface ContentStep {
   kind: 'content'
   image: string
   video?: string
+  videoLoop?: boolean
   paragraphs: string[]
 }
 
@@ -57,6 +58,8 @@ function buildSteps(node: ContentNode): Step[] {
     {
       kind: 'content',
       image: '/learning-portrait.png',
+      video: '/Historical.mp4',
+      videoLoop: false,
       paragraphs: [
         'San Martín se formó como militar en España y participó en la guerra contra Napoleón antes de regresar a América para sumarse a la causa independentista.',
         'En Mendoza preparó al Ejército de los Andes, una fuerza disciplinada que integró a soldados criollos, indígenas y libertos.',
@@ -248,9 +251,15 @@ function ContentScreen({ step, voice, onChangeVoice, onBack, onNext }: ContentSc
               src={step.video}
               poster={step.image}
               autoPlay
-              loop
+              loop={step.videoLoop !== false}
               muted
               playsInline
+              onEnded={(e) => {
+                // Park on the last frame instead of resetting / showing controls
+                const v = e.currentTarget
+                v.pause()
+                v.currentTime = Math.max(0, v.duration - 0.001)
+              }}
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
