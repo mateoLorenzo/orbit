@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Pause, Play, RotateCcw, Sparkles } from 'lucide-react'
 import { IconButton, PrimaryButton, SecondaryButton } from './primitives'
@@ -166,6 +167,7 @@ export function ContentScreen({
   onNext,
   narration,
 }: ContentScreenProps) {
+  const [isImmersive, setIsImmersive] = useState(false)
   const {
     audioRef,
     audioSrc,
@@ -179,11 +181,26 @@ export function ContentScreen({
   } = useNarrationAudio({ narration })
 
   return (
-    <div className="flex flex-1 flex-col gap-6 px-6 py-6">
+    <div
+      className={`flex min-h-0 flex-1 flex-col transition-[gap,padding] duration-500 ${
+        isImmersive ? 'gap-0 p-0' : 'gap-6 px-6 py-6'
+      }`}
+    >
       <audio ref={audioRef} src={audioSrc} preload="auto" className="hidden" />
 
-      <div className="flex min-h-[480px] flex-1 flex-col gap-6 lg:flex-row">
-        <div className="flex min-h-[420px] flex-col overflow-hidden rounded-xl bg-white lg:w-[420px] lg:shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
+      <div
+        className={`flex min-h-0 flex-1 flex-col lg:flex-row transition-[gap] duration-500 ${
+          isImmersive ? 'gap-0' : 'gap-6'
+        }`}
+      >
+        <div
+          className={`flex min-h-0 flex-col overflow-hidden rounded-xl bg-white transition-[width,opacity] duration-500 animate-in fade-in slide-in-from-left-4 ${
+            isImmersive
+              ? 'lg:w-0 lg:opacity-0 lg:invisible'
+              : 'lg:w-[420px] lg:opacity-100'
+          } lg:shrink-0`}
+          aria-hidden={isImmersive}
+        >
           <ContentText
             paragraphs={step.paragraphs}
             narratedLines={lines}
@@ -201,7 +218,11 @@ export function ContentScreen({
           />
         </div>
 
-        <div className="relative flex-1 overflow-hidden rounded-xl bg-black/4 animate-in fade-in zoom-in-95 duration-700">
+        <div
+          className={`relative min-h-0 flex-1 overflow-hidden bg-black/4 transition-[border-radius] duration-500 animate-in fade-in zoom-in-95 ${
+            isImmersive ? 'rounded-none' : 'rounded-xl'
+          }`}
+        >
           <Image
             src={step.image}
             alt="Ilustración del tema"
@@ -210,13 +231,39 @@ export function ContentScreen({
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 flex items-end justify-end p-4">
-            <SecondaryButton>Abrir</SecondaryButton>
-          </div>
+
+          <div
+            className={`pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/45 to-transparent transition-opacity duration-500 ${
+              isImmersive ? 'opacity-100' : 'opacity-0'
+            }`}
+            aria-hidden={!isImmersive}
+          />
+
+          <p
+            className={`pointer-events-none absolute bottom-12 left-1/2 max-w-3xl -translate-x-1/2 px-12 text-center text-[28px] font-medium leading-snug tracking-[-0.5px] text-white transition-opacity duration-500 ${
+              isImmersive ? 'opacity-100' : 'opacity-0'
+            }`}
+            aria-hidden={!isImmersive}
+          >
+            {step.paragraphs[0]}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setIsImmersive((value) => !value)}
+            className="absolute bottom-4 right-4 z-10 inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-black/12 bg-white px-3 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-neutral-100 active:scale-[0.98]"
+          >
+            {isImmersive ? 'Cerrar' : 'Abrir'}
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div
+        className={`flex items-center gap-6 overflow-hidden transition-[max-height,opacity] duration-500 ${
+          isImmersive ? 'pointer-events-none max-h-0 opacity-0' : 'max-h-32 opacity-100'
+        }`}
+        aria-hidden={isImmersive}
+      >
         <SecondaryButton onClick={onBack}>Volver</SecondaryButton>
         <p className="flex-1 text-center text-sm font-medium tracking-[-0.5px] text-black/30">
           Podrás avanzar hacia el próximo paso cuando finalices de ver el contenido.

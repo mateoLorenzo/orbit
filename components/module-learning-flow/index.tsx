@@ -59,10 +59,13 @@ export default function ModuleLearningFlow({
       : 'animate-in fade-in slide-in-from-left-4 duration-500 ease-out'
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f8f8] text-black">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8] text-black">
       {showHeader && <FlowHeader title={subject.name} percent={progressPercent} />}
 
-      <div key={currentStep} className={`flex flex-1 flex-col ${enterAnimation}`}>
+      <div
+        key={currentStep}
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterAnimation}`}
+      >
         {step.kind === 'intro' && (
           <IntroScreen subject={subject} node={node} onStart={goNext} />
         )}
