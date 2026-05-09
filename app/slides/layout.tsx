@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 
 export default function SlidesLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f8f8]">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8]">
       <AnimatePresence mode="wait">{children}</AnimatePresence>
     </div>
   )
