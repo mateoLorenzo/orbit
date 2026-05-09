@@ -5,6 +5,8 @@ export interface ModuleLearningFlowProps {
   node: ContentNode
   onExit: () => void
   onContinueNext?: () => void
+  lessonData?: GenericLessonData
+  audioSrc?: string
 }
 
 export interface ContentStep {

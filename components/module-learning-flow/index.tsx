@@ -7,7 +7,7 @@ import { ContentScreen } from './content-screen'
 import { IntroScreen } from './intro-screen'
 import { FlowHeader } from './primitives'
 import { QuizScreen } from './quiz-screen'
-import { buildSteps } from './steps'
+import { buildSteps, buildStepsFromData } from './steps'
 import type { ModuleLearningFlowProps } from './types'
 
 export default function ModuleLearningFlow({
@@ -15,8 +15,12 @@ export default function ModuleLearningFlow({
   node,
   onExit,
   onContinueNext,
+  lessonData,
 }: ModuleLearningFlowProps) {
-  const steps = useMemo(() => buildSteps(node), [node])
+  const steps = useMemo(
+    () => (lessonData ? buildStepsFromData(lessonData) : buildSteps(node)),
+    [lessonData, node],
+  )
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [selections, setSelections] = useState<Record<number, number>>({})
@@ -24,14 +28,16 @@ export default function ModuleLearningFlow({
 
   const step = steps[currentStep]
   const isFirstLessonAnimatedSlide =
-    currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 4
+    !lessonData && currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 4
   const isSecondLessonAnimatedSlide =
-    currentStep === 3 && step.kind === 'content' && step.paragraphs.length >= 4
-  const lessonNarration = isFirstLessonAnimatedSlide
-    ? FIRST_LESSON_NARRATION
-    : isSecondLessonAnimatedSlide
-      ? SECOND_LESSON_NARRATION
-      : undefined
+    !lessonData && currentStep === 3 && step.kind === 'content' && step.paragraphs.length >= 4
+  const lessonNarration = lessonData
+    ? undefined
+    : isFirstLessonAnimatedSlide
+      ? FIRST_LESSON_NARRATION
+      : isSecondLessonAnimatedSlide
+        ? SECOND_LESSON_NARRATION
+        : undefined
 
   const totalProgressSteps = steps.filter((item) => item.kind === 'content' || item.kind === 'quiz').length
   const completedProgressSteps = steps
