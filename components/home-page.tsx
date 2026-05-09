@@ -1,10 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/app-context'
 import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
-import SubjectDetail from '@/components/subject-detail'
 import AddSubjectModal from '@/components/add-subject-modal'
 import { Plus } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
@@ -22,7 +22,8 @@ function getSubjectProgress(subject: Subject): number {
 }
 
 export default function HomePage() {
-  const { subjects, selectedSubject, setSelectedSubject } = useApp()
+  const router = useRouter()
+  const { subjects } = useApp()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'finished'>('active')
 
@@ -39,10 +40,6 @@ export default function HomePage() {
       careerProgress: { completed: completedCount, total: totalCount, percent },
     }
   }, [subjects])
-
-  if (selectedSubject) {
-    return <SubjectDetail subject={selectedSubject} onBack={() => setSelectedSubject(null)} />
-  }
 
   const visibleSubjects = activeTab === 'active' ? activeSubjects : finishedSubjects
 
@@ -127,7 +124,7 @@ export default function HomePage() {
           {/* Subject grid */}
           <SubjectGrid
             subjects={visibleSubjects}
-            onSelectSubject={(subject: Subject) => setSelectedSubject(subject)}
+            onSelectSubject={(subject: Subject) => router.push(`/subjects/${subject.id}`)}
             getProgress={getSubjectProgress}
           />
         </div>

@@ -24,13 +24,13 @@ const ROUTES = [
     ],
   },
   {
-    section: 'Lesson (nodeId = "demo")',
+    section: 'Subject + Lesson',
     items: [
-      { href: '/lesson/demo/start', label: '/lesson/demo/start' },
-      { href: '/lesson/demo/slides/0', label: '/lesson/demo/slides/0' },
-      { href: '/lesson/demo/slides/1', label: '/lesson/demo/slides/1' },
-      { href: '/lesson/demo/quiz/0', label: '/lesson/demo/quiz/0' },
-      { href: '/lesson/demo/done', label: '/lesson/demo/done' },
+      { href: '/subjects/1', label: '/subjects/1 — detalle de materia' },
+      {
+        href: '/subjects/1/lessons/c1',
+        label: '/subjects/1/lessons/c1 — flujo de lección',
+      },
     ],
   },
   {

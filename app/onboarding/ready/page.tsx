@@ -7,7 +7,7 @@ export default function OnboardingListoPage() {
       title="¡Bien hecho! Ya podés comenzar a aprender"
       description="Pantalla de cierre del onboarding. Dos CTAs: arrancar la primera lección o ir a Mis materias."
       actions={[
-        { label: 'Comenzar ahora', href: '/lesson/demo/start' },
+        { label: 'Comenzar ahora', href: '/subjects/1/lessons/c1' },
         {
           label: 'Ir a Mis materias',
           href: '/',
