@@ -45,7 +45,7 @@ export default function OnboardingReadyPage() {
 
         <motion.div variants={FADE_CHILD} className="flex w-full flex-col gap-2">
           <Link
-            href="/lesson/demo/start"
+            href="/subjects/1/lessons/c2"
             className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#FF5C00] px-5 text-base font-medium tracking-[-0.32px] text-white shadow-[0_8px_24px_-12px_rgba(255,92,0,0.6)] transition-[transform,filter] hover:brightness-110 hover:-translate-y-px"
           >
             Comenzar ahora
