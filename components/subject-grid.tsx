@@ -1,24 +1,44 @@
 'use client'
 
 import type { Subject } from '@/lib/types'
-import { SubjectIcon } from '@/lib/subject-icons'
+
+const SUBJECT_DOT_COLORS = [
+  '#5639cc',
+  '#4ccc39',
+  '#cc3939',
+  '#bdcc39',
+  '#ac39cc',
+  '#cc39ac',
+  '#3994cc',
+  '#cc7a39',
+]
+
+function dotStyle(color: string) {
+  return {
+    backgroundImage: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.55), rgba(255,255,255,0) 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.35), rgba(0,0,0,0) 65%)`,
+    backgroundColor: color,
+  }
+}
 
 interface SubjectCardProps {
   subject: Subject
   progress: number
+  color: string
   onClick: () => void
 }
 
-function SubjectCard({ subject, progress, onClick }: SubjectCardProps) {
+function SubjectCard({ subject, progress, color, onClick }: SubjectCardProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       className="group flex h-[187px] w-full flex-col items-start gap-4 overflow-hidden rounded-xl bg-white p-6 text-left transition-shadow hover:shadow-md"
     >
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-black text-white">
-        <SubjectIcon name={subject.icon} className="size-6" />
-      </div>
+      <div
+        className="size-12 shrink-0 rounded-full"
+        style={dotStyle(color)}
+        aria-hidden
+      />
 
       <div className="w-full">
         <h3 className="w-full truncate text-2xl font-medium leading-none tracking-[-0.5px] text-black">
@@ -29,13 +49,13 @@ function SubjectCard({ subject, progress, onClick }: SubjectCardProps) {
       <div className="mt-auto flex w-full flex-col gap-3">
         <div className="h-1 w-full overflow-hidden rounded-full bg-black/12 shadow-[0_1px_2px_2px_rgba(0,0,0,0.02)]">
           <div
-            className="h-full rounded-full bg-black transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-[#ff4f00] to-black transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex w-full items-start justify-between text-base font-medium leading-[1.2] text-black">
-          <p className="opacity-50">Progreso</p>
-          <p className="text-right opacity-50">{progress}%</p>
+        <div className="flex w-full items-start justify-between text-base font-medium leading-[1.2]">
+          <p className="text-black opacity-50">Progreso</p>
+          <p className="text-right text-black">{progress}%</p>
         </div>
       </div>
     </button>
@@ -59,11 +79,12 @@ export default function SubjectGrid({ subjects, onSelectSubject, getProgress }: 
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {subjects.map((subject) => (
+      {subjects.map((subject, index) => (
         <SubjectCard
           key={subject.id}
           subject={subject}
           progress={getProgress(subject)}
+          color={SUBJECT_DOT_COLORS[index % SUBJECT_DOT_COLORS.length]}
           onClick={() => onSelectSubject(subject)}
         />
       ))}
