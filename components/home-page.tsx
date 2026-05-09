@@ -6,7 +6,8 @@ import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
 import SubjectDetail from '@/components/subject-detail'
 import AddSubjectModal from '@/components/add-subject-modal'
-import { Folder, Plus, Settings2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import AppSidebar from '@/components/app-sidebar'
 
 function flattenContent(nodes: ContentNode[]): ContentNode[] {
   return nodes.flatMap((n) => [n, ...(n.children ? flattenContent(n.children) : [])])
@@ -46,36 +47,7 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen bg-[#f8f8f8] text-black">
-      {/* Sidebar */}
-      <aside className="sticky top-0 flex h-screen w-[88px] shrink-0 flex-col items-center gap-6 border-r border-black/8 p-6">
-        <div className="size-10 shrink-0 rounded-full bg-[#e1e1e1]" aria-hidden />
-        <div className="h-px w-4 shrink-0 bg-black/8" aria-hidden />
-
-        <nav className="flex flex-1 flex-col items-center gap-3">
-          <button
-            type="button"
-            aria-label="Materias"
-            className="flex size-10 items-center justify-center rounded-lg bg-black text-white"
-          >
-            <Folder className="size-4" />
-          </button>
-          <button
-            type="button"
-            aria-label="Ajustes"
-            className="flex size-10 items-center justify-center rounded-lg border border-black/8 text-black/50 transition-colors hover:text-black"
-          >
-            <Settings2 className="size-4" />
-          </button>
-        </nav>
-
-        <button
-          type="button"
-          aria-label="Cuenta"
-          className="flex size-10 items-center justify-center rounded-lg bg-black/4 text-sm font-medium tracking-[-0.5px] text-black/40"
-        >
-          JV
-        </button>
-      </aside>
+      <AppSidebar />
 
       {/* Main feed */}
       <main className="flex-1 min-w-0">
