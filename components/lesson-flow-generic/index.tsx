@@ -114,6 +114,8 @@ export default function LessonFlowGeneric({
         {step.kind === 'content' && (
           <ContentScreen
             paragraphs={lesson.paragraphs}
+            image={assetsQuery.data?.image ?? null}
+            audio={assetsQuery.data?.audio ?? null}
             onBack={handleContentBack}
             onNext={handleContentNext}
           />

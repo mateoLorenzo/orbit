@@ -1,24 +1,30 @@
 'use client'
 
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { AssetPanel } from './asset-panel'
 
 interface Props {
   paragraphs: string[]
+  image: { url: string } | null
+  audio: { url: string; durationSec: number } | null
   onBack: () => void
   onNext: () => void
 }
 
-export function ContentScreen({ paragraphs, onBack, onNext }: Props) {
+export function ContentScreen({ paragraphs, image, audio, onBack, onNext }: Props) {
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex flex-1 items-center justify-center px-6">
-        <div className="flex max-w-3xl flex-col gap-5">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 gap-8 overflow-y-auto px-6 py-8">
+        <div className="flex flex-1 flex-col gap-5">
           {paragraphs.map((p, i) => (
             <p key={i} className="text-lg leading-relaxed tracking-[-0.32px] text-black">
               {p}
             </p>
           ))}
         </div>
+        <aside className="w-[360px] shrink-0">
+          <AssetPanel image={image} audio={audio} />
+        </aside>
       </div>
       <footer className="flex items-center justify-between border-t border-black/8 bg-white px-6 py-4">
         <button
