@@ -5,7 +5,7 @@ import { upsertNodeProgress } from '@/lib/db/queries'
 export const dynamic = 'force-dynamic'
 
 const PatchStatusSchema = z.object({
-  status: z.enum(['bloqueado', 'disponible', 'en_curso', 'dominado']),
+  status: z.enum(['locked', 'available', 'in_progress', 'mastered']),
 })
 
 export async function PATCH(

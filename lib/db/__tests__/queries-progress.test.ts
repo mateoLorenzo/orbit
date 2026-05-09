@@ -16,7 +16,7 @@ vi.mock('../client', () => ({
       updatedAt: 'progress.updatedAt',
     },
     nodes: { id: 'nodes.id', subjectId: 'nodes.subjectId' },
-    progressStatus: { enumValues: ['bloqueado', 'disponible', 'en_curso', 'dominado'] },
+    progressStatus: { enumValues: ['locked', 'available', 'in_progress', 'mastered'] },
   },
 }))
 
@@ -42,7 +42,7 @@ describe('progress queries', () => {
   })
 
   it('listProgressForSubject builds a join + filter query and returns rows', async () => {
-    const rows = [{ id: 'p1', nodeId: 'n1', status: 'dominado', completedAt: new Date(), updatedAt: new Date() }]
+    const rows = [{ id: 'p1', nodeId: 'n1', status: 'mastered', completedAt: new Date(), updatedAt: new Date() }]
     const where = vi.fn().mockResolvedValue(rows)
     const innerJoin = vi.fn(() => ({ where }))
     const from = vi.fn(() => ({ innerJoin }))
@@ -57,10 +57,10 @@ describe('progress queries', () => {
 
   it('summarizeProgressForSubject computes counts and percent', async () => {
     const rows = [
-      { id: '1', nodeId: 'n1', status: 'dominado', completedAt: null, updatedAt: new Date() },
-      { id: '2', nodeId: 'n2', status: 'dominado', completedAt: null, updatedAt: new Date() },
-      { id: '3', nodeId: 'n3', status: 'en_curso', completedAt: null, updatedAt: new Date() },
-      { id: '4', nodeId: 'n4', status: 'disponible', completedAt: null, updatedAt: new Date() },
+      { id: '1', nodeId: 'n1', status: 'mastered', completedAt: null, updatedAt: new Date() },
+      { id: '2', nodeId: 'n2', status: 'mastered', completedAt: null, updatedAt: new Date() },
+      { id: '3', nodeId: 'n3', status: 'in_progress', completedAt: null, updatedAt: new Date() },
+      { id: '4', nodeId: 'n4', status: 'available', completedAt: null, updatedAt: new Date() },
     ]
     const where = vi.fn().mockResolvedValue(rows)
     const innerJoin = vi.fn(() => ({ where }))
@@ -70,11 +70,11 @@ describe('progress queries', () => {
     const summary = await summarizeProgressForSubject('subject-1')
     expect(summary).toEqual({
       total: 4,
-      dominado: 2,
-      enCurso: 1,
-      disponible: 1,
-      bloqueado: 0,
-      percentDominado: 50,
+      mastered: 2,
+      inProgress: 1,
+      available: 1,
+      locked: 0,
+      percentMastered: 50,
     })
   })
 
@@ -86,35 +86,35 @@ describe('progress queries', () => {
 
     const summary = await summarizeProgressForSubject('subject-1')
     expect(summary.total).toBe(0)
-    expect(summary.percentDominado).toBe(0)
+    expect(summary.percentMastered).toBe(0)
   })
 
-  it("upsertNodeProgress sets completedAt when status is 'dominado'", async () => {
+  it("upsertNodeProgress sets completedAt when status is 'mastered'", async () => {
     const returning = vi.fn().mockResolvedValue([
-      { id: 'p1', userId: 'demo', nodeId: 'n1', status: 'dominado', completedAt: new Date(), updatedAt: new Date() },
+      { id: 'p1', userId: 'demo', nodeId: 'n1', status: 'mastered', completedAt: new Date(), updatedAt: new Date() },
     ])
     const onConflictDoUpdate = vi.fn(() => ({ returning }))
     const values = vi.fn(() => ({ onConflictDoUpdate }))
     mockDb.insert.mockReturnValue({ values })
 
-    const out = await upsertNodeProgress('n1', 'dominado')
-    expect(out.status).toBe('dominado')
+    const out = await upsertNodeProgress('n1', 'mastered')
+    expect(out.status).toBe('mastered')
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({ nodeId: 'n1', status: 'dominado', completedAt: expect.any(Date) }),
+      expect.objectContaining({ nodeId: 'n1', status: 'mastered', completedAt: expect.any(Date) }),
     )
   })
 
-  it("upsertNodeProgress nulls completedAt when leaving 'dominado'", async () => {
+  it("upsertNodeProgress nulls completedAt when leaving 'mastered'", async () => {
     const returning = vi.fn().mockResolvedValue([
-      { id: 'p1', userId: 'demo', nodeId: 'n1', status: 'en_curso', completedAt: null, updatedAt: new Date() },
+      { id: 'p1', userId: 'demo', nodeId: 'n1', status: 'in_progress', completedAt: null, updatedAt: new Date() },
     ])
     const onConflictDoUpdate = vi.fn(() => ({ returning }))
     const values = vi.fn(() => ({ onConflictDoUpdate }))
     mockDb.insert.mockReturnValue({ values })
 
-    await upsertNodeProgress('n1', 'en_curso')
+    await upsertNodeProgress('n1', 'in_progress')
     expect(values).toHaveBeenCalledWith(
-      expect.objectContaining({ nodeId: 'n1', status: 'en_curso', completedAt: null }),
+      expect.objectContaining({ nodeId: 'n1', status: 'in_progress', completedAt: null }),
     )
   })
 })

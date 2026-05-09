@@ -18,10 +18,10 @@ function jsonRequest(method: string, body?: unknown): Request {
 
 const seed = {
   userId: 'demo',
-  formatoPreferido: 'texto' as const,
-  horariosActivos: [] as string[],
-  erroresRecurrentes: [] as string[],
-  friccionPromedio: 50,
+  preferredFormat: 'text' as const,
+  activeHours: [] as string[],
+  recurringMistakes: [] as string[],
+  averageFriction: 50,
   updatedAt: new Date(),
 }
 
@@ -40,16 +40,16 @@ describe('Profile routes (Drizzle)', () => {
   })
 
   it('PATCH /api/profile merges fields and returns 200', async () => {
-    vi.mocked(queries.updateProfile).mockResolvedValue({ ...seed, formatoPreferido: 'audio' as const })
-    const res = await PATCH(jsonRequest('PATCH', { formatoPreferido: 'audio' }))
+    vi.mocked(queries.updateProfile).mockResolvedValue({ ...seed, preferredFormat: 'audio' as const })
+    const res = await PATCH(jsonRequest('PATCH', { preferredFormat: 'audio' }))
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.profile.formatoPreferido).toBe('audio')
-    expect(vi.mocked(queries.updateProfile)).toHaveBeenCalledWith({ formatoPreferido: 'audio' })
+    expect(body.profile.preferredFormat).toBe('audio')
+    expect(vi.mocked(queries.updateProfile)).toHaveBeenCalledWith({ preferredFormat: 'audio' })
   })
 
-  it('PATCH /api/profile returns 400 on invalid formato', async () => {
-    const res = await PATCH(jsonRequest('PATCH', { formatoPreferido: 'invalid' }))
+  it('PATCH /api/profile returns 400 on invalid format', async () => {
+    const res = await PATCH(jsonRequest('PATCH', { preferredFormat: 'invalid' }))
     expect(res.status).toBe(400)
     expect(vi.mocked(queries.updateProfile)).not.toHaveBeenCalled()
   })

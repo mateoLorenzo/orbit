@@ -90,32 +90,32 @@ export async function listProgressForSubject(subjectId: string) {
 
 export interface ProgressSummary {
   total: number
-  dominado: number
-  enCurso: number
-  disponible: number
-  bloqueado: number
-  percentDominado: number
+  mastered: number
+  inProgress: number
+  available: number
+  locked: number
+  percentMastered: number
 }
 
 export async function summarizeProgressForSubject(subjectId: string): Promise<ProgressSummary> {
   const rows = await listProgressForSubject(subjectId)
   const counts = {
     total: rows.length,
-    dominado: rows.filter((r) => r.status === 'dominado').length,
-    enCurso: rows.filter((r) => r.status === 'en_curso').length,
-    disponible: rows.filter((r) => r.status === 'disponible').length,
-    bloqueado: rows.filter((r) => r.status === 'bloqueado').length,
+    mastered: rows.filter((r) => r.status === 'mastered').length,
+    inProgress: rows.filter((r) => r.status === 'in_progress').length,
+    available: rows.filter((r) => r.status === 'available').length,
+    locked: rows.filter((r) => r.status === 'locked').length,
   }
-  const percentDominado =
-    counts.total === 0 ? 0 : Math.round((counts.dominado / counts.total) * 100)
-  return { ...counts, percentDominado }
+  const percentMastered =
+    counts.total === 0 ? 0 : Math.round((counts.mastered / counts.total) * 100)
+  return { ...counts, percentMastered }
 }
 
 export async function upsertNodeProgress(
   nodeId: string,
   status: typeof schema.progressStatus.enumValues[number],
 ) {
-  const completedAt = status === 'dominado' ? new Date() : null
+  const completedAt = status === 'mastered' ? new Date() : null
   const [row] = await db
     .insert(schema.progress)
     .values({
@@ -155,10 +155,10 @@ export async function getProfile() {
 }
 
 export async function updateProfile(input: {
-  formatoPreferido?: typeof schema.formatoPreferido.enumValues[number]
-  horariosActivos?: string[]
-  erroresRecurrentes?: string[]
-  friccionPromedio?: number
+  preferredFormat?: typeof schema.preferredFormat.enumValues[number]
+  activeHours?: string[]
+  recurringMistakes?: string[]
+  averageFriction?: number
 }) {
   // Ensure singleton exists
   await getProfile()

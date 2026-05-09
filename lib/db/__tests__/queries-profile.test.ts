@@ -8,7 +8,7 @@ vi.mock('../client', () => ({
   },
   schema: {
     profiles: { userId: 'profiles.userId' },
-    formatoPreferido: { enumValues: ['texto', 'audio', 'video', 'visual', 'podcast'] },
+    preferredFormat: { enumValues: ['text', 'audio', 'video', 'visual', 'podcast'] },
   },
 }))
 
@@ -24,10 +24,10 @@ const mockDb = clientModule.db as unknown as {
 
 const seed = {
   userId: 'demo',
-  formatoPreferido: 'texto',
-  horariosActivos: [],
-  erroresRecurrentes: [],
-  friccionPromedio: 50,
+  preferredFormat: 'text',
+  activeHours: [],
+  recurringMistakes: [],
+  averageFriction: 50,
   updatedAt: new Date(),
 }
 
@@ -70,15 +70,15 @@ describe('profile queries', () => {
     const from1 = vi.fn(() => ({ where: where1 }))
     mockDb.select.mockReturnValue({ from: from1 })
 
-    const returning = vi.fn().mockResolvedValue([{ ...seed, formatoPreferido: 'audio' }])
+    const returning = vi.fn().mockResolvedValue([{ ...seed, preferredFormat: 'audio' }])
     const where2 = vi.fn(() => ({ returning }))
     const set = vi.fn(() => ({ where: where2 }))
     mockDb.update.mockReturnValue({ set })
 
-    const out = await updateProfile({ formatoPreferido: 'audio' })
-    expect(out.formatoPreferido).toBe('audio')
+    const out = await updateProfile({ preferredFormat: 'audio' })
+    expect(out.preferredFormat).toBe('audio')
     expect(set).toHaveBeenCalledWith(
-      expect.objectContaining({ formatoPreferido: 'audio', updatedAt: expect.any(Date) }),
+      expect.objectContaining({ preferredFormat: 'audio', updatedAt: expect.any(Date) }),
     )
   })
 })
