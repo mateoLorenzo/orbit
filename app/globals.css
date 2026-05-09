@@ -40,6 +40,9 @@
   --success: oklch(0.65 0.2 145);
   --warning: oklch(0.75 0.18 80);
   --info: oklch(0.55 0.22 260);
+
+  scrollbar-width: thin;
+  scrollbar-color: gray transparent;
 }
 
 @theme inline {
@@ -93,31 +96,33 @@
   body {
     @apply bg-background text-foreground;
   }
-  button:not(:disabled),
-  [role='button']:not(:disabled),
-  [role='link']:not(:disabled),
-  [role='checkbox']:not(:disabled),
-  [role='radio']:not(:disabled),
-  [role='switch']:not(:disabled),
-  [role='tab']:not(:disabled),
-  [role='menuitem']:not(:disabled),
-  [role='menuitemcheckbox']:not(:disabled),
-  [role='menuitemradio']:not(:disabled),
-  [role='option']:not(:disabled),
-  [role='combobox']:not(:disabled),
-  a[href],
-  summary,
-  label[for],
-  select:not(:disabled),
-  input[type='checkbox']:not(:disabled),
-  input[type='radio']:not(:disabled),
-  input[type='submit']:not(:disabled),
-  input[type='reset']:not(:disabled),
-  input[type='button']:not(:disabled),
-  input[type='file']:not(:disabled),
-  input[type='color']:not(:disabled) {
-    cursor: pointer;
-  }
+}
+
+/* Pointer cursor on interactive elements — outside @layer to override utilities */
+button:not(:disabled),
+[role='button']:not(:disabled),
+[role='link']:not(:disabled),
+[role='checkbox']:not(:disabled),
+[role='radio']:not(:disabled),
+[role='switch']:not(:disabled),
+[role='tab']:not(:disabled),
+[role='menuitem']:not(:disabled),
+[role='menuitemcheckbox']:not(:disabled),
+[role='menuitemradio']:not(:disabled),
+[role='option']:not(:disabled),
+[role='combobox']:not(:disabled),
+a[href],
+summary,
+label[for],
+select:not(:disabled),
+input[type='checkbox']:not(:disabled),
+input[type='radio']:not(:disabled),
+input[type='submit']:not(:disabled),
+input[type='reset']:not(:disabled),
+input[type='button']:not(:disabled),
+input[type='file']:not(:disabled),
+input[type='color']:not(:disabled) {
+  cursor: pointer !important;
 }
 
 /* Custom scrollbar */
