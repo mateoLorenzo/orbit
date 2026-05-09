@@ -44,8 +44,13 @@ export function buildSteps(node: ContentNode): Step[] {
     },
     {
       kind: 'quiz',
-      question: '¿En qué año se completó el cruce de los Andes?',
-      options: ['1810', '1817', '1820', '1853'],
+      question: '¿Qué idea guiaba el proyecto político y militar de San Martín?',
+      options: [
+        'Defender únicamente el territorio argentino',
+        'Lograr una independencia continental en Sudamérica',
+        'Evitar enfrentamientos militares con los realistas',
+        'Regresar a España después de liberar Chile',
+      ],
       correctIndex: 1,
     },
     {

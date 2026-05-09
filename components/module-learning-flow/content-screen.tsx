@@ -42,6 +42,29 @@ function NarratedParagraph({
   )
 }
 
+function AiSpeakingAvatar({ isPlaying }: { isPlaying: boolean }) {
+  return (
+    <div
+      className={`ai-speaking-avatar ${isPlaying ? 'ai-speaking-avatar--active' : ''}`}
+      aria-hidden
+    >
+      <span className="ai-speaking-wave ai-speaking-wave--outer" />
+      <span className="ai-speaking-wave ai-speaking-wave--inner" />
+      <span className="ai-speaking-core">
+        <span className="flex h-4 items-end gap-0.5">
+          {[0, 1, 2, 3].map((bar) => (
+            <span
+              key={bar}
+              className="ai-speaking-bar"
+              style={{ animationDelay: `${bar * 120}ms` }}
+            />
+          ))}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 function VoicePanel({
   voice,
   subtitleEnabled,
@@ -60,7 +83,7 @@ function VoicePanel({
   return (
     <div className="border-t border-black/4 p-6">
       <div className="flex items-center gap-3 rounded-xl bg-[#f8f8f8] p-4">
-        <div className="size-10 shrink-0 rounded-full bg-black/10" aria-hidden />
+        <AiSpeakingAvatar isPlaying={playState === 'playing'} />
         <div className="min-w-0 flex-1">
           <p className="text-base font-medium leading-none tracking-[-0.5px] text-black/40">
             {subtitleEnabled && isGenerating ? 'Generando narración…' : 'Voz elegida'}
