@@ -23,3 +23,12 @@ node_modules
 
 # typescript build cache
 tsconfig.tsbuildinfo
+
+# skills lockfile
+skills-lock.json
+
+# agents lockfile
+.agents
+
+# claude
+.claude
