@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import { PrimaryButton } from './primitives'
+import { PrimaryButton, SecondaryButton } from './primitives'
 import type { QuizStep } from './types'
 
 interface QuizScreenProps {
@@ -9,6 +9,7 @@ interface QuizScreenProps {
   selectedIndex: number | null
   onSelect: (index: number) => void
   onContinue: () => void
+  onBack: () => void
 }
 
 export function QuizScreen({
@@ -16,6 +17,7 @@ export function QuizScreen({
   selectedIndex,
   onSelect,
   onContinue,
+  onBack,
 }: QuizScreenProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10 lg:px-[10vw]">
@@ -51,10 +53,13 @@ export function QuizScreen({
       </div>
 
       <div className="flex flex-col items-center gap-3 animate-in fade-in duration-500 delay-700 fill-mode-backwards">
-        <PrimaryButton onClick={onContinue}>
-          Continuar
-          <ArrowRight className="size-5" strokeWidth={2} />
-        </PrimaryButton>
+        <div className="flex items-center gap-3">
+          <SecondaryButton onClick={onBack}>Volver</SecondaryButton>
+          <PrimaryButton onClick={onContinue}>
+            Continuar
+            <ArrowRight className="size-5" strokeWidth={2} />
+          </PrimaryButton>
+        </div>
         <p className="text-sm font-medium tracking-[-0.28px] text-black/40">
           Sabrás la respuesta correcta al finalizar el tema
         </p>
