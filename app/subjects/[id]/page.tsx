@@ -4,16 +4,26 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import AppSidebar from '@/components/app-sidebar'
 import SubjectDetailView from '@/components/subject-detail-view'
-import { useApp } from '@/lib/app-context'
+import { useSubject } from '@/lib/hooks/use-subject'
+import { mapSubjectRow } from '@/lib/domain/adapters'
 
 export default function SubjectDetailPage() {
   const params = useParams()
   const id = (params.id as string) ?? ''
-  const { subjects } = useApp()
+  const { data: dbSubject, isLoading, error } = useSubject(id)
 
-  const subject = subjects.find((s) => s.id === id)
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#f8f8f8] text-black">
+        <AppSidebar />
+        <main className="flex min-w-0 flex-1 items-center justify-center">
+          <p className="text-base text-black/50">Cargando materia...</p>
+        </main>
+      </div>
+    )
+  }
 
-  if (!subject) {
+  if (error || !dbSubject) {
     return (
       <div className="flex min-h-screen bg-[#f8f8f8] text-black">
         <AppSidebar />
@@ -35,5 +45,5 @@ export default function SubjectDetailPage() {
     )
   }
 
-  return <SubjectDetailView subject={subject} />
+  return <SubjectDetailView subject={mapSubjectRow(dbSubject)} />
 }
