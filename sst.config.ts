@@ -94,6 +94,9 @@ export default $config({
       visibilityTimeout: '300 seconds',
       fifo: true,
     })
+    const lessonTextQ = makeQueueWithDlq('LessonTextGenerationQueue', {
+      visibilityTimeout: '180 seconds',
+    })
 
     // ─── Lambda env shared by all processors ─────────────────────────────
     const lambdaEnv = {
@@ -107,6 +110,7 @@ export default $config({
       VIDEO_QUEUE_URL: videoQ.main.url,
       EMBEDDING_QUEUE_URL: embeddingQ.main.url,
       GRAPH_RECALC_QUEUE_URL: graphRecalcQ.main.url,
+      LESSON_TEXT_QUEUE_URL: lessonTextQ.main.url,
     }
 
     const sharedLink = [
@@ -181,9 +185,21 @@ export default $config({
       memory: '1024 MB',
       timeout: '300 seconds',
       environment: lambdaEnv,
-      link: [...sharedLink, graphRecalcQ.main],
+      link: [...sharedLink, graphRecalcQ.main, lessonTextQ.main],
     })
     graphRecalcQ.main.subscribe(graphRecalc.arn)
+
+    // ─── Lambda: lesson-text ──────────────────────────────────────────────
+    const lessonText = new sst.aws.Function('LessonTextGenerator', {
+      handler: 'lambdas/lesson-text/index.handler',
+      memory: '1024 MB',
+      timeout: '180 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, lessonTextQ.main],
+    })
+    lessonTextQ.main.subscribe(lessonText.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
 
     // ─── S3 → SQS event notification ──────────────────────────────────────
     originalsBucket.notify({
@@ -207,6 +223,7 @@ export default $config({
       VideoQueueUrl: videoQ.main.url,
       EmbeddingQueueUrl: embeddingQ.main.url,
       GraphRecalcQueueUrl: graphRecalcQ.main.url,
+      LessonTextQueueUrl: lessonTextQ.main.url,
     }
   },
 })
