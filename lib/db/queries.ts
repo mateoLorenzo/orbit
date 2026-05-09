@@ -156,6 +156,8 @@ export async function getProfile() {
 }
 
 export async function updateProfile(input: {
+  displayName?: string | null
+  interests?: string[]
   preferredFormat?: typeof schema.preferredFormat.enumValues[number]
   activeHours?: string[]
   recurringMistakes?: string[]

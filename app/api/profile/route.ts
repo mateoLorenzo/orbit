@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic'
 
 const UpdateProfileSchema = z
   .object({
+    displayName: z.string().min(1).max(100).nullish(),
+    interests: z.array(z.string().min(1).max(40)).max(20).optional(),
     preferredFormat: z.enum(['text', 'audio', 'video', 'visual', 'podcast']).optional(),
     activeHours: z.array(z.string()).optional(),
     recurringMistakes: z.array(z.string()).optional(),
