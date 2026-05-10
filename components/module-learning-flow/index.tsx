@@ -16,6 +16,7 @@ export default function ModuleLearningFlow({
   onExit,
   onContinueNext,
   lessonData,
+  onLessonComplete,
 }: ModuleLearningFlowProps) {
   const steps = useMemo(
     () => (lessonData ? buildStepsFromData(lessonData) : buildSteps(node)),
@@ -25,6 +26,7 @@ export default function ModuleLearningFlow({
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [selections, setSelections] = useState<Record<number, number>>({})
   const [voiceIndex] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
 
   const step = steps[currentStep]
   const isFirstLessonAnimatedSlide =
@@ -53,7 +55,17 @@ export default function ModuleLearningFlow({
 
   const goNext = () => {
     setDirection('forward')
-    if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1)
+    if (currentStep < steps.length - 1) {
+      const nextIndex = currentStep + 1
+      setCurrentStep(nextIndex)
+      if (steps[nextIndex]?.kind === 'done' && onLessonComplete && !submitted) {
+        const answers = steps
+          .map((s, i) => (s.kind === 'quiz' ? selections[i] ?? -1 : null))
+          .filter((a): a is number => a !== null)
+        setSubmitted(true)
+        void Promise.resolve(onLessonComplete(answers))
+      }
+    }
   }
 
   const goPrev = () => {

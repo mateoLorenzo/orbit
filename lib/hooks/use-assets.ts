@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { qk } from '@/lib/query/keys'
 import { getNodeAssets, submitQuiz, type NodeAssets } from '@/lib/api/nodes'
 
@@ -16,8 +16,14 @@ export function useNodeAssets(nodeId: string) {
   })
 }
 
-export function useSubmitQuiz(nodeId: string) {
+export function useSubmitQuiz(nodeId: string, subjectSlug?: string) {
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: (answers: number[]) => submitQuiz(nodeId, answers),
+    onSuccess: () => {
+      if (subjectSlug) {
+        qc.invalidateQueries({ queryKey: qk.nodes(subjectSlug) })
+      }
+    },
   })
 }

@@ -7,6 +7,7 @@ export interface ModuleLearningFlowProps {
   onContinueNext?: () => void
   lessonData?: GenericLessonData
   audioSrc?: string
+  onLessonComplete?: (answers: number[]) => void | Promise<unknown>
 }
 
 export interface ContentStep {

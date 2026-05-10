@@ -6,7 +6,7 @@ import AppSidebar from '@/components/app-sidebar'
 import ModuleLearningFlow from '@/components/module-learning-flow'
 import { useSubject } from '@/lib/hooks/use-subject'
 import { useNodes } from '@/lib/hooks/use-nodes'
-import { useNodeAssets } from '@/lib/hooks/use-assets'
+import { useNodeAssets, useSubmitQuiz } from '@/lib/hooks/use-assets'
 import { mapSubjectRow } from '@/lib/domain/adapters'
 import { isDemoSubject, getDemoLessons, getDemoNode } from '@/lib/demo'
 import type { ContentNode } from '@/lib/types'
@@ -26,6 +26,7 @@ export default function LessonPage() {
   const realNodes = nodesQuery.data ?? []
   const currentRealNode = realNodes.find((n) => n.slug === nodeSlug)
   const assetsQuery = useNodeAssets(currentRealNode?.id ?? '')
+  const submitQuizMutation = useSubmitQuiz(currentRealNode?.id ?? '', subjectSlug)
 
   const onExit = () => router.push(`/subjects/${subjectSlug}`)
 
@@ -157,6 +158,7 @@ export default function LessonPage() {
       onContinueNext={
         next ? () => router.push(`/subjects/${subjectSlug}/lessons/${next.slug}`) : undefined
       }
+      onLessonComplete={(answers) => submitQuizMutation.mutateAsync(answers)}
     />
   )
 }
