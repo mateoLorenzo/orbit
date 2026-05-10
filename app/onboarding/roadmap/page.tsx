@@ -16,7 +16,8 @@ const NODES: RoadmapNode[] = [
   {
     id: '2',
     title: 'El Cruce de los Andes',
-    description: '',
+    description:
+      'La estrategia militar y política de José de San Martín para liberar Chile y avanzar sobre el Virreinato del Perú.',
     duration: '15 min',
   },
   {
