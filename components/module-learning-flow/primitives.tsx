@@ -75,7 +75,7 @@ export function ProgressBar({
       onPointerCancel={handlePointerUp}
     >
       <div
-        className={`absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden bg-black/4 transition-[height] duration-150 ${
+        className={`absolute inset-x-0 bottom-0 overflow-hidden bg-black/4 transition-[height] duration-150 ${
           isDragging ? 'h-1.5' : 'h-1 group-hover:h-1.5'
         }`}
       >
@@ -84,13 +84,6 @@ export function ProgressBar({
           style={{ width: `${percent}%` }}
         />
       </div>
-      <div
-        aria-hidden
-        className={`absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black shadow-sm transition-opacity duration-150 ${
-          isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}
-        style={{ left: `${percent}%` }}
-      />
     </div>
   )
 }

@@ -127,6 +127,7 @@ export default function HomePage() {
                 width={323}
                 height={196}
                 className="pointer-events-none absolute right-0 top-0 h-full w-auto"
+                priority
               />
               <div className="relative flex flex-1 flex-col gap-4 font-medium tracking-[-0.5px]">
                 <p className="text-base leading-none opacity-50">Progreso de la carrera</p>
