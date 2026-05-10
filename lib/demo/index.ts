@@ -1,10 +1,10 @@
 import type { ContentNode } from '@/lib/types'
 import { HISTORIA_LESSONS } from './historia/lessons'
 
-const DEMO_SUBJECT_ID = process.env.NEXT_PUBLIC_DEMO_SUBJECT_ID
+export const DEMO_SUBJECT_SLUG = 'historia-procesos-independencia'
 
-export function isDemoSubject(s: { id: string } | null | undefined): boolean {
-  return !!s && !!DEMO_SUBJECT_ID && s.id === DEMO_SUBJECT_ID
+export function isDemoSubject(s: { slug?: string } | null | undefined): boolean {
+  return !!s && s.slug === DEMO_SUBJECT_SLUG
 }
 
 export function getDemoLessons(): ContentNode[] {

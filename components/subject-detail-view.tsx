@@ -16,6 +16,7 @@ import AppSidebar from '@/components/app-sidebar'
 import { useFiles, useUploadFile, useDeleteFile } from '@/lib/hooks/use-files'
 import { useNodes } from '@/lib/hooks/use-nodes'
 import { mapFileRow } from '@/lib/domain/adapters'
+import { isDemoSubject, getDemoLessons } from '@/lib/demo'
 import type { ContentNode, Source, Subject } from '@/lib/types'
 
 type TabType = 'clases' | 'documentacion'
@@ -351,10 +352,14 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   const [page, setPage] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const nodesQuery = useNodes(subject.slug)
+  const isDemo = isDemoSubject(subject)
+  const nodesQuery = useNodes(isDemo ? '' : subject.slug)
   const lessons: ContentNode[] = useMemo(
-    () => (nodesQuery.data ?? []).map((n, i) => nodeToContentNode(n, i)),
-    [nodesQuery.data],
+    () =>
+      isDemo
+        ? getDemoLessons()
+        : (nodesQuery.data ?? []).map((n, i) => nodeToContentNode(n, i)),
+    [isDemo, nodesQuery.data],
   )
   const progress = useMemo(() => getSubjectProgressFromLessons(lessons), [lessons])
   const cardStates = useMemo(() => getCardStates(lessons), [lessons])

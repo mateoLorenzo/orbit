@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSubjects } from '@/lib/hooks/use-subjects'
 import { mapSubjectRow } from '@/lib/domain/adapters'
+import { isDemoSubject, getDemoLessons } from '@/lib/demo'
 import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
 import AddSubjectModal from '@/components/add-subject-modal'
@@ -34,7 +35,11 @@ function getDailyChallenge(activeSubjects: Subject[]) {
 export default function HomePage() {
   const router = useRouter()
   const { data: dbSubjects = [], isLoading } = useSubjects()
-  const subjects = dbSubjects.map(mapSubjectRow)
+  const subjects = dbSubjects.map(mapSubjectRow).map((s) =>
+    isDemoSubject(s) ? { ...s, content: getDemoLessons() } : s,
+  )
+  // Pin the demo subject first so the showcase content is visible at a glance.
+  subjects.sort((a, b) => (isDemoSubject(a) ? -1 : isDemoSubject(b) ? 1 : 0))
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'finished'>('active')
 
