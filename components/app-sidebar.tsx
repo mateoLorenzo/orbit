@@ -14,6 +14,7 @@ export default function AppSidebar() {
           width={40}
           height={40}
           className="size-10"
+          style={{ width: 'auto', height: 'auto' }}
           priority
         />
       </Link>
