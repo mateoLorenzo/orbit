@@ -193,6 +193,17 @@ export function ContentScreen({
   onVideoProgress,
 }: ContentScreenProps) {
   const [isFullscreen, setIsFullscreen] = useState(false)
+  // Below the lg breakpoint we lock to the fullscreen overlay layout — the
+  // split (text + video) layout is desktop-only by design.
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const update = () => setIsMobileViewport(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  const showFullscreen = isMobileViewport || isFullscreen
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const {
     getActiveParagraphIndex,
@@ -286,13 +297,13 @@ export function ContentScreen({
       src={step.image}
       alt="Ilustración del tema"
       fill
-      sizes={isFullscreen ? '100vw' : '(min-width: 1024px) 60vw, 100vw'}
+      sizes={showFullscreen ? '100vw' : '(min-width: 1024px) 60vw, 100vw'}
       className="object-cover"
       priority
     />
   )
 
-  if (isFullscreen) {
+  if (showFullscreen) {
     return (
       <div className="relative min-h-0 flex-1 overflow-hidden bg-black/4">
         {mediaElement}
@@ -329,14 +340,16 @@ export function ContentScreen({
           ) : null}
         </div>
 
-        <div className="absolute right-5 top-5 z-10 lg:right-6 lg:top-6">
-          <OverlayIconButton
-            onClick={() => setIsFullscreen(false)}
-            ariaLabel="Salir de pantalla completa"
-          >
-            <Minimize2 className="size-4" strokeWidth={2} />
-          </OverlayIconButton>
-        </div>
+        {!isMobileViewport ? (
+          <div className="absolute right-5 top-5 z-10 lg:right-6 lg:top-6">
+            <OverlayIconButton
+              onClick={() => setIsFullscreen(false)}
+              ariaLabel="Salir de pantalla completa"
+            >
+              <Minimize2 className="size-4" strokeWidth={2} />
+            </OverlayIconButton>
+          </div>
+        ) : null}
 
         {overlayWords && overlayWords.length > 0 ? (
           <NarratedSubtitle
