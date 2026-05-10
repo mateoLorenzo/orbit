@@ -103,8 +103,8 @@ export function TimelineScreen({ step, onBack, onNext }: TimelineScreenProps) {
       },
 
       ScrollArea: ({ children }) => (
-        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto overflow-y-hidden">
-          <div className="flex flex-col gap-10">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto overflow-y-hidden -mr-10">
+          <div className="flex flex-col gap-10 pr-10">{children}</div>
         </div>
       ),
 
@@ -187,9 +187,8 @@ export function TimelineScreen({ step, onBack, onNext }: TimelineScreenProps) {
               onClick={() => setActiveIndex(index)}
               aria-label={`Ir al evento ${index + 1}`}
               style={{ ['--delay' as string]: `${delay}ms` }}
-              className={`relative flex size-8 cursor-pointer items-center justify-center rounded-full border-[3px] border-[#ff4f00] transition-transform duration-200 hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#ff4f00]/30 [animation:timeline-node-in_400ms_cubic-bezier(0.34,1.56,0.64,1)_var(--delay)_both] ${
-                isActive ? 'bg-[#ff4f00]' : 'bg-white'
-              }`}
+              className={`relative flex size-8 cursor-pointer items-center justify-center rounded-full border-[3px] border-[#ff4f00] transition-transform duration-200 hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#ff4f00]/30 [animation:timeline-node-in_400ms_cubic-bezier(0.34,1.56,0.64,1)_var(--delay)_both] ${isActive ? 'bg-[#ff4f00]' : 'bg-white'
+                }`}
             >
               {isActive ? (
                 <>
@@ -222,11 +221,10 @@ export function TimelineScreen({ step, onBack, onNext }: TimelineScreenProps) {
           <button
             type="button"
             onClick={() => setActiveIndex(index)}
-            className={`flex h-9 items-center justify-center rounded-lg px-2 text-sm font-medium tracking-[-0.5px] transition-colors ${
-              isActive
+            className={`flex h-9 items-center justify-center rounded-lg px-2 text-sm font-medium tracking-[-0.5px] transition-colors ${isActive
                 ? 'bg-[#ff4f00] text-white'
                 : 'bg-black/4 text-black hover:bg-black/8'
-            }`}
+              }`}
           >
             {date}
           </button>
