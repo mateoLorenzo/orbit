@@ -16,6 +16,7 @@
     "backfill:slugs": "tsx --env-file=.env.local scripts/backfill-slugs.ts",
     "smoke:db": "tsx --env-file=.env.local scripts/smoke-db.ts",
     "smoke:e2e": "bash scripts/with-aws.sh tsx --env-file=.env.local scripts/smoke-e2e.ts",
+    "upload:file": "bash scripts/with-aws.sh tsx --env-file=.env.local scripts/upload-to-subject.ts",
     "smoke:voyage": "tsx --env-file=.env.local scripts/smoke-voyage.ts"
   },
   "dependencies": {
