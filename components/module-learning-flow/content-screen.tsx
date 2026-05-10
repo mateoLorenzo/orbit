@@ -92,9 +92,8 @@ function NarratedSubtitle({
             {line.map((word, wordIdx) => (
               <span
                 key={wordIdx}
-                className={`transition-colors duration-200 ${
-                  word.revealed ? 'text-white' : 'text-white/40'
-                }`}
+                className={`transition-colors duration-200 ${word.revealed ? 'text-white' : 'text-white/40'
+                  }`}
               >
                 {word.text}
                 {wordIdx < line.length - 1 ? ' ' : ''}
@@ -125,9 +124,8 @@ function NarratedPanelParagraph({
             {line.map((word, wordIdx) => (
               <span
                 key={wordIdx}
-                className={`transition-colors duration-200 ${
-                  word.revealed ? 'text-black' : 'text-black/24'
-                }`}
+                className={`transition-colors duration-200 ${word.revealed ? 'text-black' : 'text-black/24'
+                  }`}
               >
                 {word.text}
                 {wordIdx < line.length - 1 ? ' ' : ''}
@@ -289,9 +287,8 @@ export function ContentScreen({
   const mobileFallbackText = activeParagraphLines[activeLineIdx]?.text ?? overlayFallbackText
   const displayedFallbackText = isMobileViewport ? mobileFallbackText : overlayFallbackText
 
-  const subtitleClass = `pointer-events-none absolute bottom-20 left-6 right-6 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] lg:left-24 lg:right-24${
-    isMobileViewport ? ' line-clamp-2' : ''
-  }`
+  const subtitleClass = `pointer-events-none absolute bottom-20 left-6 right-6 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] lg:left-24 lg:right-24${isMobileViewport ? ' line-clamp-2' : ''
+    }`
 
   const mediaElement = step.video ? (
     <video
@@ -321,7 +318,8 @@ export function ContentScreen({
     />
   )
 
-  if (showFullscreen) {
+  // Mobile: locked to fullscreen overlay layout (no split view by design).
+  if (isMobileViewport) {
     return (
       <div className="relative min-h-0 flex-1 overflow-hidden bg-black/4">
         {mediaElement}
@@ -331,7 +329,7 @@ export function ContentScreen({
           className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
         />
 
-        <div className="absolute left-5 top-5 z-10 flex items-center gap-2 lg:left-6 lg:top-6">
+        <div className="absolute left-5 top-5 z-10 flex items-center gap-2">
           <OverlayTextButton onClick={onExit}>Volver</OverlayTextButton>
           {subtitleEnabled ? (
             <OverlayIconButton
@@ -358,20 +356,9 @@ export function ContentScreen({
           ) : null}
         </div>
 
-        {!isMobileViewport ? (
-          <div className="absolute right-5 top-5 z-10 lg:right-6 lg:top-6">
-            <OverlayIconButton
-              onClick={() => setIsFullscreen(false)}
-              ariaLabel="Salir de pantalla completa"
-            >
-              <Minimize2 className="size-4" strokeWidth={2} />
-            </OverlayIconButton>
-          </div>
-        ) : null}
-
         {displayedOverlayWords && displayedOverlayWords.length > 0 ? (
           <NarratedSubtitle
-            key={`${overlayParagraphIndex}-${isMobileViewport ? activeLineIdx : 'full'}`}
+            key={`${overlayParagraphIndex}-${activeLineIdx}`}
             wordsByLine={displayedOverlayWords}
             className={subtitleClass}
             fullAccessibleText={overlayFallbackText}
@@ -382,7 +369,7 @@ export function ContentScreen({
           </p>
         )}
 
-        <div className="absolute right-5 top-1/2 z-10 flex -translate-y-1/2 flex-col gap-[15px] lg:hidden">
+        <div className="absolute right-5 top-1/2 z-10 flex -translate-y-1/2 flex-col gap-[15px]">
           <OverlayIconButton onClick={onBack} ariaLabel="Anterior">
             <ArrowUp className="size-5" strokeWidth={2} />
           </OverlayIconButton>
@@ -390,38 +377,32 @@ export function ContentScreen({
             <ArrowDown className="size-5" strokeWidth={2} />
           </OverlayIconButton>
         </div>
-
-        <div className="absolute bottom-6 left-6 z-10 hidden lg:block">
-          <OverlayTextButton onClick={onBack}>
-            Anterior
-            <ArrowUp className="size-5" strokeWidth={2} />
-          </OverlayTextButton>
-        </div>
-
-        <div className="absolute bottom-6 right-6 z-10 hidden lg:block">
-          <OverlayTextButton onClick={onNext}>
-            Continuar
-            <ArrowDown className="size-5" strokeWidth={2} />
-          </OverlayTextButton>
-        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-6 p-6">
-      <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white lg:w-[420px] lg:shrink-0 animate-in fade-in slide-in-from-left-4 duration-500">
+    <div
+      className={`flex min-h-0 flex-1 flex-col transition-[gap,padding] duration-500 ${isFullscreen ? 'gap-0 p-0' : 'gap-6 p-6'
+        }`}
+    >
+      <div
+        className={`flex min-h-0 flex-1 flex-col transition-[gap] duration-500 lg:flex-row ${isFullscreen ? 'gap-0' : 'gap-6'
+          }`}
+      >
+        <div
+          className={`relative flex min-h-0 flex-col overflow-hidden rounded-xl bg-white transition-[width,opacity] duration-500 animate-in fade-in slide-in-from-left-4 lg:shrink-0 ${isFullscreen
+              ? 'lg:w-0 lg:opacity-0 lg:invisible'
+              : 'lg:w-[420px] lg:opacity-100'
+            }`}
+          aria-hidden={isFullscreen}
+        >
           <ContentText
             paragraphs={step.paragraphs}
             narratedParagraphCount={lines.length}
             subtitleEnabled={subtitleEnabled}
             getNarratedParagraph={getNarratedParagraph}
           />
-        </div>
-
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl bg-black/4 animate-in fade-in zoom-in-95 duration-500">
-          {mediaElement}
 
           {subtitleEnabled ? (
             <button
@@ -448,19 +429,58 @@ export function ContentScreen({
               )}
             </button>
           ) : null}
+        </div>
+
+        <div
+          className={`relative min-h-0 flex-1 overflow-hidden bg-black/4 transition-[border-radius] duration-500 animate-in fade-in zoom-in-95 ${isFullscreen ? 'rounded-none' : 'rounded-xl'
+            }`}
+        >
+          {mediaElement}
+
+          <div
+            aria-hidden={!isFullscreen}
+            className={`pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-500 ${isFullscreen ? 'opacity-100' : 'opacity-0'
+              }`}
+          />
+
+          {overlayWords && overlayWords.length > 0 ? (
+            <NarratedSubtitle
+              key={overlayParagraphIndex}
+              wordsByLine={overlayWords}
+              fullAccessibleText={overlayFallbackText}
+              className={`pointer-events-none absolute bottom-20 left-24 right-24 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-opacity duration-500 ${isFullscreen ? 'opacity-100' : 'opacity-0'
+                }`}
+            />
+          ) : (
+            <p
+              aria-hidden={!isFullscreen}
+              className={`pointer-events-none absolute bottom-20 left-24 right-24 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-opacity duration-500 ${isFullscreen ? 'opacity-100' : 'opacity-0'
+                }`}
+            >
+              {overlayFallbackText}
+            </p>
+          )}
 
           <button
             type="button"
-            onClick={() => setIsFullscreen(true)}
-            aria-label="Pantalla completa"
+            onClick={() => setIsFullscreen((value) => !value)}
+            aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
             className="absolute bottom-4 right-4 z-10 inline-flex size-10 items-center justify-center rounded-lg border border-black/12 bg-white text-black transition-colors hover:bg-neutral-100 active:scale-[0.98]"
           >
-            <Maximize2 className="size-4" strokeWidth={2} />
+            {isFullscreen ? (
+              <Minimize2 className="size-4" strokeWidth={2} />
+            ) : (
+              <Maximize2 className="size-4" strokeWidth={2} />
+            )}
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div
+        className={`flex items-center gap-6 overflow-hidden transition-[max-height,opacity] duration-500 ${isFullscreen ? 'pointer-events-none max-h-0 opacity-0' : 'max-h-32 opacity-100'
+          }`}
+        aria-hidden={isFullscreen}
+      >
         <SecondaryButton onClick={onBack}>Volver</SecondaryButton>
         <p className="flex-1 text-center text-sm font-medium tracking-[-0.5px] text-black/30">
           Podrás avanzar hacia el próximo paso cuando finalices de ver el contenido.
