@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Pause, Play } from 'lucide-react'
+import { Maximize2, Minimize2, Pause, Play } from 'lucide-react'
 import { PrimaryButton, SecondaryButton } from './primitives'
 import type { ContentStep } from './types'
 import type { NarratedWord, NarrationState } from './use-narration-audio'
@@ -12,6 +12,7 @@ interface ContentScreenProps {
   onBack: () => void
   onNext: () => void
   narrationState: NarrationState
+  onVideoProgress?: (fraction: number) => void
 }
 
 function NarratedParagraph({
@@ -105,8 +106,10 @@ export function ContentScreen({
   onBack,
   onNext,
   narrationState,
+  onVideoProgress,
 }: ContentScreenProps) {
   const [isImmersive, setIsImmersive] = useState(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const {
     getActiveParagraphIndex,
     getNarratedParagraph,
@@ -116,6 +119,58 @@ export function ContentScreen({
     subtitleEnabled,
     togglePlayback,
   } = narrationState
+
+  // When there's no audio narration, drive the header progress bar from the
+  // video's playback time so the same FlowHeader animates in lessons that
+  // ship videos instead of narration. Use rAF (not onTimeUpdate, which fires
+  // ~4×/s) so the bar tracks playback at 60fps without a CSS lag.
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !onVideoProgress) return
+
+    let rafId: number | null = null
+
+    const report = () => {
+      if (Number.isFinite(video.duration) && video.duration > 0) {
+        onVideoProgress(Math.min(1, video.currentTime / video.duration))
+      }
+    }
+
+    const tick = () => {
+      report()
+      if (!video.paused && !video.ended) {
+        rafId = window.requestAnimationFrame(tick)
+      } else {
+        rafId = null
+      }
+    }
+
+    const handlePlay = () => {
+      if (rafId === null) rafId = window.requestAnimationFrame(tick)
+    }
+    const handleStop = () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId)
+        rafId = null
+      }
+      report()
+    }
+
+    video.addEventListener('play', handlePlay)
+    video.addEventListener('pause', handleStop)
+    video.addEventListener('ended', handleStop)
+
+    if (!video.paused && !video.ended) {
+      rafId = window.requestAnimationFrame(tick)
+    }
+
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId)
+      video.removeEventListener('play', handlePlay)
+      video.removeEventListener('pause', handleStop)
+      video.removeEventListener('ended', handleStop)
+    }
+  }, [onVideoProgress, step.video])
 
   const overlayParagraphIndex = subtitleEnabled ? getActiveParagraphIndex() : 0
   const overlayWords = subtitleEnabled ? getNarratedParagraph(overlayParagraphIndex) : null
@@ -155,6 +210,7 @@ export function ContentScreen({
           {step.video ? (
             <video
               key={step.video}
+              ref={videoRef}
               src={step.video}
               poster={step.image}
               autoPlay
@@ -238,9 +294,14 @@ export function ContentScreen({
           <button
             type="button"
             onClick={() => setIsImmersive((value) => !value)}
-            className="absolute bottom-4 right-4 z-10 inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-black/12 bg-white px-3 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-neutral-100 active:scale-[0.98]"
+            aria-label={isImmersive ? 'Salir de pantalla completa' : 'Pantalla completa'}
+            className="absolute bottom-4 right-4 z-10 inline-flex size-10 items-center justify-center rounded-lg border border-black/12 bg-white text-black transition-colors hover:bg-neutral-100 active:scale-[0.98]"
           >
-            {isImmersive ? 'Cerrar' : 'Abrir'}
+            {isImmersive ? (
+              <Minimize2 className="size-4" strokeWidth={2} />
+            ) : (
+              <Maximize2 className="size-4" strokeWidth={2} />
+            )}
           </button>
         </div>
       </div>

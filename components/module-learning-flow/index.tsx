@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FIRST_LESSON_NARRATION, SECOND_LESSON_NARRATION } from './constants'
 import { DoneScreen } from './done-screen'
 import { ContentScreen } from './content-screen'
@@ -24,10 +24,17 @@ export default function ModuleLearningFlow({
   const [selections, setSelections] = useState<Record<number, number>>({})
 
   const step = steps[currentStep]
+  const hasCruceNarration = node.title === 'El Cruce de los Andes'
   const isFirstLessonAnimatedSlide =
-    currentStep === 1 && step.kind === 'content' && step.paragraphs.length >= 3
+    hasCruceNarration &&
+    currentStep === 1 &&
+    step.kind === 'content' &&
+    step.paragraphs.length >= 3
   const isSecondLessonAnimatedSlide =
-    currentStep === 3 && step.kind === 'content' && step.paragraphs.length >= 4
+    hasCruceNarration &&
+    currentStep === 3 &&
+    step.kind === 'content' &&
+    step.paragraphs.length >= 4
   const lessonNarration = isFirstLessonAnimatedSlide
     ? FIRST_LESSON_NARRATION
     : isSecondLessonAnimatedSlide
@@ -41,23 +48,42 @@ export default function ModuleLearningFlow({
 
   const isCurrentProgressStep = isProgressStep(step.kind)
   const isNarratedContent = step.kind === 'content' && Boolean(lessonNarration)
+  const isVideoOnlyContent =
+    step.kind === 'content' && Boolean(step.video) && !lessonNarration
   const audioFraction =
     narrationState.audioDuration > 0
       ? Math.min(1, narrationState.currentTime / narrationState.audioDuration)
       : 0
 
+  // Reset video-driven progress when the step changes; ContentScreen reports
+  // a fresh fraction once the next video starts playing.
+  const [videoProgress, setVideoProgress] = useState(0)
+  useEffect(() => {
+    setVideoProgress(0)
+  }, [currentStep])
+  // Clamp to monotonically non-decreasing — looping videos reset currentTime
+  // to 0 each cycle, but the progress bar should stay full once filled.
+  const handleVideoProgress = useCallback((fraction: number) => {
+    setVideoProgress((prev) => (fraction > prev ? fraction : prev))
+  }, [])
+
   // Bar reflects this step's own progress, edge-to-edge:
-  // - narrated content steps fill with the audio playback (0 → 100%)
+  // - narrated content fills with the audio playback (0 → 100%)
+  // - video-only content fills with the video playback (0 → 100%)
   // - other progress steps stay full (you've already passed through them)
   const progressPercent = !isCurrentProgressStep
     ? 0
     : isNarratedContent
       ? audioFraction * 100
-      : 100
+      : isVideoOnlyContent
+        ? videoProgress * 100
+        : 100
 
-  // Disable the CSS width transition while audio is actively driving updates at
-  // 60fps (rAF). Otherwise the bar visibly chases the target with a 700ms lag.
-  const isProgressBarSmooth = !(isNarratedContent && narrationState.playState === 'playing')
+  // Disable the CSS width transition while a media element is driving updates
+  // at 60fps (rAF). Otherwise the bar visibly chases the target with a 700ms lag.
+  const isProgressBarSmooth =
+    !(isNarratedContent && narrationState.playState === 'playing') &&
+    !isVideoOnlyContent
 
   const showHeader = isProgressStep(step.kind)
 
@@ -106,7 +132,7 @@ export default function ModuleLearningFlow({
         className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterAnimation}`}
       >
         {step.kind === 'intro' && (
-          <IntroScreen subject={subject} node={node} onStart={goNext} />
+          <IntroScreen subject={subject} node={node} onStart={goNext} onExit={onExit} />
         )}
         {step.kind === 'content' && (
           <ContentScreen
@@ -114,6 +140,7 @@ export default function ModuleLearningFlow({
             onBack={goPrev}
             onNext={goNext}
             narrationState={narrationState}
+            onVideoProgress={isVideoOnlyContent ? handleVideoProgress : undefined}
           />
         )}
         {step.kind === 'timeline' && (
