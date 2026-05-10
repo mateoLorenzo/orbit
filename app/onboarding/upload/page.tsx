@@ -107,7 +107,7 @@ export default function OnboardingUploadPage() {
                       Suelta o carga tus archivos
                     </p>
                     <p className="text-sm text-black/40">
-                      PDF, JPG o PNG hasta 50mb
+                      PDF, JPG o PNG
                     </p>
                   </div>
                   <button

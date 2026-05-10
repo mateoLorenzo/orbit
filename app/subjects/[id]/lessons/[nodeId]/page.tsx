@@ -8,7 +8,13 @@ import { useSubject } from '@/lib/hooks/use-subject'
 import { useNodes } from '@/lib/hooks/use-nodes'
 import { useNodeAssets, useSubmitQuiz } from '@/lib/hooks/use-assets'
 import { mapSubjectRow } from '@/lib/domain/adapters'
-import { isDemoSubject, getDemoLessons, getDemoNode } from '@/lib/demo'
+import {
+  DEMO_SUBJECT_SLUG,
+  getDemoLessons,
+  getDemoNode,
+  getDemoSubject,
+  isDemoSubject,
+} from '@/lib/demo'
 import type { ContentNode } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -29,6 +35,26 @@ export default function LessonPage() {
   const submitQuizMutation = useSubmitQuiz(currentRealNode?.id ?? '', subjectSlug)
 
   const onExit = () => router.push(`/subjects/${subjectSlug}`)
+
+  // Demo lessons render synchronously from hardcoded data — no skeleton flash
+  // while the (unnecessary) subject network request is in flight.
+  if (subjectSlug === DEMO_SUBJECT_SLUG) {
+    const demoNode = getDemoNode(nodeSlug)
+    if (!demoNode) return null
+    const lessons = getDemoLessons()
+    const idx = lessons.findIndex((l) => l.id === demoNode.id)
+    const next = idx >= 0 ? lessons[idx + 1] : undefined
+    return (
+      <ModuleLearningFlow
+        subject={getDemoSubject()}
+        node={demoNode}
+        onExit={onExit}
+        onContinueNext={
+          next ? () => router.push(`/subjects/${subjectSlug}/lessons/${next.id}`) : undefined
+        }
+      />
+    )
+  }
 
   if (subjectQuery.isLoading) {
     return <LessonPageSkeleton />

@@ -206,7 +206,7 @@ export default function AddSubjectModal({ isOpen, onClose }: AddSubjectModalProp
                         Suelta o carga tus archivos
                       </p>
                       <p className="text-xs text-black/40">
-                        PDF, JPG o PNG hasta 50mb
+                        PDF, JPG o PNG
                       </p>
                     </div>
                     <button
