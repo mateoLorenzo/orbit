@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useApp } from '@/lib/app-context'
+import { useSubjects } from '@/lib/hooks/use-subjects'
+import { mapSubjectRow } from '@/lib/domain/adapters'
+import { isDemoSubject, getDemoLessons } from '@/lib/demo'
 import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
 import AddSubjectModal from '@/components/add-subject-modal'
 import { ArrowRight, Flame, Plus } from 'lucide-react'
 import Image from 'next/image'
 import AppSidebar from '@/components/app-sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function flattenContent(nodes: ContentNode[]): ContentNode[] {
   return nodes.flatMap((n) => [n, ...(n.children ? flattenContent(n.children) : [])])
@@ -33,7 +36,12 @@ function getDailyChallenge(activeSubjects: Subject[]) {
 
 export default function HomePage() {
   const router = useRouter()
-  const { subjects } = useApp()
+  const { data: dbSubjects = [], isLoading } = useSubjects()
+  const subjects = dbSubjects.map(mapSubjectRow).map((s) =>
+    isDemoSubject(s) ? { ...s, content: getDemoLessons() } : s,
+  )
+  // Pin the demo subject first so the showcase content is visible at a glance.
+  subjects.sort((a, b) => (isDemoSubject(a) ? -1 : isDemoSubject(b) ? 1 : 0))
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'finished'>('active')
 
@@ -56,7 +64,33 @@ export default function HomePage() {
 
   const handleStartChallenge = () => {
     if (!dailyChallenge) return
-    router.push(`/subjects/${dailyChallenge.subject.id}`)
+    router.push(`/subjects/${dailyChallenge.subject.slug}`)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#f8f8f8] text-black">
+        <AppSidebar />
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto flex max-w-[1352px] flex-col gap-6 p-6">
+            <Skeleton className="h-9 w-72" />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <Skeleton className="h-32 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-9 w-56" />
+              <Skeleton className="h-10 w-40 rounded-lg" />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-[200px] rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -193,7 +227,7 @@ export default function HomePage() {
             {/* Subject grid */}
             <SubjectGrid
               subjects={visibleSubjects}
-              onSelectSubject={(subject: Subject) => router.push(`/subjects/${subject.id}`)}
+              onSelectSubject={(subject: Subject) => router.push(`/subjects/${subject.slug}`)}
               getProgress={getSubjectProgress}
             />
           </div>

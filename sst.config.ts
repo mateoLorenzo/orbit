@@ -94,6 +94,15 @@ export default $config({
       visibilityTimeout: '300 seconds',
       fifo: true,
     })
+    const lessonTextQ = makeQueueWithDlq('LessonTextGenerationQueue', {
+      visibilityTimeout: '180 seconds',
+    })
+    const imageGenQ = makeQueueWithDlq('ImageGenerationQueue', {
+      visibilityTimeout: '120 seconds',
+    })
+    const audioNarrationQ = makeQueueWithDlq('AudioNarrationQueue', {
+      visibilityTimeout: '180 seconds',
+    })
 
     // ─── Lambda env shared by all processors ─────────────────────────────
     const lambdaEnv = {
@@ -107,6 +116,9 @@ export default $config({
       VIDEO_QUEUE_URL: videoQ.main.url,
       EMBEDDING_QUEUE_URL: embeddingQ.main.url,
       GRAPH_RECALC_QUEUE_URL: graphRecalcQ.main.url,
+      LESSON_TEXT_QUEUE_URL: lessonTextQ.main.url,
+      IMAGE_GEN_QUEUE_URL: imageGenQ.main.url,
+      AUDIO_NARRATION_QUEUE_URL: audioNarrationQ.main.url,
     }
 
     const sharedLink = [
@@ -181,9 +193,51 @@ export default $config({
       memory: '1024 MB',
       timeout: '300 seconds',
       environment: lambdaEnv,
-      link: [...sharedLink, graphRecalcQ.main],
+      link: [...sharedLink, graphRecalcQ.main, lessonTextQ.main, imageGenQ.main],
     })
     graphRecalcQ.main.subscribe(graphRecalc.arn)
+
+    // ─── Lambda: lesson-text ──────────────────────────────────────────────
+    const lessonText = new sst.aws.Function('LessonTextGenerator', {
+      handler: 'lambdas/lesson-text/index.handler',
+      memory: '1024 MB',
+      timeout: '180 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, lessonTextQ.main, audioNarrationQ.main],
+    })
+    lessonTextQ.main.subscribe(lessonText.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
+
+    // ─── Lambda: image-generator ──────────────────────────────────────────
+    const imageGenerator = new sst.aws.Function('ImageGenerator', {
+      handler: 'lambdas/image-generator/index.handler',
+      memory: '1024 MB',
+      timeout: '120 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, imageGenQ.main],
+    })
+    imageGenQ.main.subscribe(imageGenerator.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
+
+    // ─── Lambda: audio-narration ──────────────────────────────────────────
+    const audioNarration = new sst.aws.Function('AudioNarrator', {
+      handler: 'lambdas/audio-narration/index.handler',
+      memory: '1024 MB',
+      timeout: '180 seconds',
+      environment: lambdaEnv,
+      link: [...sharedLink, audioNarrationQ.main],
+      permissions: [
+        {
+          actions: ['polly:SynthesizeSpeech'],
+          resources: ['*'],
+        },
+      ],
+    })
+    audioNarrationQ.main.subscribe(audioNarration.arn, {
+      transform: { eventSourceMapping: withConcurrency },
+    })
 
     // ─── S3 → SQS event notification ──────────────────────────────────────
     originalsBucket.notify({
@@ -207,6 +261,9 @@ export default $config({
       VideoQueueUrl: videoQ.main.url,
       EmbeddingQueueUrl: embeddingQ.main.url,
       GraphRecalcQueueUrl: graphRecalcQ.main.url,
+      LessonTextQueueUrl: lessonTextQ.main.url,
+      ImageGenQueueUrl: imageGenQ.main.url,
+      AudioNarrationQueueUrl: audioNarrationQ.main.url,
     }
   },
 })

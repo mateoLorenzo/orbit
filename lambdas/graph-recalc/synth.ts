@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { callTool } from '../_shared/anthropic'
+import { generate } from '../_shared/ai'
 
 const MAX_FILE_TEXT_CHARS = 60_000
 
@@ -20,32 +20,17 @@ export async function summarizeFile(input: {
       ? input.text.slice(0, MAX_FILE_TEXT_CHARS)
       : input.text
 
-  const raw = await callTool<FileSummary>({
-    model: 'fast',
+  return generate({
+    tier: 'fast',
+    schema: FileSummarySchema,
+    schemaName: 'FileSummary',
+    schemaDescription:
+      'A 2 to 4 sentence summary plus 5 to 12 keywords for this file. Keywords should be the core concepts a student must learn.',
     system:
       'You analyze student-uploaded study materials. Produce concise, faithful summaries strictly grounded in the supplied text. Never invent topics not present in the source. Output English regardless of the source language.',
-    user: `Subject: ${input.subjectName}\nFile: ${input.filename}\n\n--- Material ---\n${text}`,
-    toolName: 'submit_summary',
-    toolDescription:
-      'Submit a 2 to 4 sentence summary plus 5 to 12 keywords for this file. Keywords should be the core concepts a student must learn.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        summary: { type: 'string', description: '2-4 sentence summary in English.' },
-        keywords: {
-          type: 'array',
-          items: { type: 'string' },
-          minItems: 1,
-          maxItems: 20,
-          description: 'Core concepts as 5-12 short noun phrases.',
-        },
-      },
-      required: ['summary', 'keywords'],
-    },
+    prompt: `Subject: ${input.subjectName}\nFile: ${input.filename}\n\n--- Material ---\n${text}`,
     maxTokens: 800,
   })
-
-  return FileSummarySchema.parse(raw)
 }
 
 const SynthGraphSchema = z.object({
@@ -80,8 +65,12 @@ export async function synthesizeGraph(input: {
       ? `\n\nExisting graph nodes (reuse these exact titles when the same concept reappears):\n- ${input.existingTitles.join('\n- ')}`
       : ''
 
-  const raw = await callTool<SynthGraph>({
-    model: 'fast',
+  return generate({
+    tier: 'fast',
+    schema: SynthGraphSchema,
+    schemaName: 'ConceptGraph',
+    schemaDescription:
+      'Synthesized concept graph for this subject. Each node is one atomic, teachable concept with optional prerequisite titles referencing other nodes in this same response.',
     system:
       'You design study learning paths as concept graphs.\n' +
       'Rules:\n' +
@@ -90,38 +79,7 @@ export async function synthesizeGraph(input: {
       '- "prerequisiteTitles" must reference other node titles in this same response. Avoid cycles.\n' +
       '- Reuse existing titles verbatim when the same concept appears.\n' +
       '- Use English for titles and briefs regardless of the source language.',
-    user: `Subject: ${input.subjectName}\n\nMaterials:\n${filesBlock}${existingBlock}\n\nGenerate the concept graph.`,
-    toolName: 'submit_graph',
-    toolDescription: 'Submit the synthesized concept graph for this subject.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        nodes: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              title: { type: 'string', description: 'Short concept title (3-8 words).' },
-              contentBrief: {
-                type: 'string',
-                description: '2-5 sentence overview of what this node covers.',
-              },
-              prerequisiteTitles: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Titles of other nodes (in this response) that must be learned first.',
-              },
-            },
-            required: ['title', 'contentBrief', 'prerequisiteTitles'],
-          },
-          minItems: 1,
-          maxItems: 50,
-        },
-      },
-      required: ['nodes'],
-    },
+    prompt: `Subject: ${input.subjectName}\n\nMaterials:\n${filesBlock}${existingBlock}\n\nGenerate the concept graph.`,
     maxTokens: 4096,
   })
-
-  return SynthGraphSchema.parse(raw)
 }

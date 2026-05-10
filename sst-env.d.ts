@@ -14,6 +14,18 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "AudioNarrationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AudioNarrationQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AudioNarrator": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "DatabaseUrl": {
       "type": "sst.sst.Secret"
       "value": string
@@ -66,6 +78,18 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "ImageGenerationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ImageGenerationQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ImageGenerator": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "ImageQueue": {
       "type": "sst.aws.Queue"
       "url": string
@@ -73,6 +97,18 @@ declare module "sst" {
     "ImageQueueDlq": {
       "type": "sst.aws.Queue"
       "url": string
+    }
+    "LessonTextGenerationQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "LessonTextGenerationQueueDlq": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "LessonTextGenerator": {
+      "name": string
+      "type": "sst.aws.Function"
     }
     "OriginalsBucket": {
       "name": string

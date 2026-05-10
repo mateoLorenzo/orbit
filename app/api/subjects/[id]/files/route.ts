@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
-import { getSubject, insertPendingFile, listFilesForSubject, DEMO_USER_ID } from '@/lib/db/queries'
+import { getSubjectBySlug, insertPendingFile, listFilesForSubject, DEMO_USER_ID } from '@/lib/db/queries'
 import { presignUpload } from '@/lib/aws/s3'
 import { fileTypeForMime } from '@/lib/files/mime'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const subject = await getSubject(id)
+  const { id: slug } = await params
+  const subject = await getSubjectBySlug(slug)
   if (!subject) return NextResponse.json({ error: 'not found' }, { status: 404 })
-  const files = await listFilesForSubject(id)
+  const files = await listFilesForSubject(subject.id)
   return NextResponse.json({ files })
 }
 
@@ -22,8 +22,8 @@ const RequestUploadSchema = z.object({
 })
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: subjectId } = await params
-  const subject = await getSubject(subjectId)
+  const { id: slug } = await params
+  const subject = await getSubjectBySlug(slug)
   if (!subject) return NextResponse.json({ error: 'subject not found' }, { status: 404 })
 
   const body = await req.json().catch(() => null)
@@ -42,10 +42,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200)
-  const s3Key = `${DEMO_USER_ID}/${subjectId}/${randomUUID()}-${safeFilename}`
+  const s3Key = `${DEMO_USER_ID}/${subject.id}/${randomUUID()}-${safeFilename}`
 
   const fileRow = await insertPendingFile({
-    subjectId,
+    subjectId: subject.id,
     s3Key,
     originalFilename: filename,
     mimeType,

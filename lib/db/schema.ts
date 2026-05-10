@@ -48,11 +48,15 @@ export const subjects = pgTable(
       .references(() => authUsers.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     description: text('description'),
+    slug: text('slug').notNull(),
     lastUploadAt: timestamp('last_upload_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('idx_subjects_user').on(t.userId)],
+  (t) => [
+    index('idx_subjects_user').on(t.userId),
+    unique('subjects_slug_unique').on(t.slug),
+  ],
 )
 
 export const files = pgTable(
@@ -133,6 +137,7 @@ export const nodes = pgTable(
       .references(() => subjects.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     contentBrief: text('content_brief').notNull(),
+    slug: text('slug').notNull(),
     topicEmbedding: vector('topic_embedding', { dimensions: 1024 }),
     status: nodeStatus('status').notNull().default('active'),
     positionX: integer('position_x'),
@@ -144,6 +149,7 @@ export const nodes = pgTable(
     index('idx_nodes_path').on(t.pathId),
     index('idx_nodes_subject_status').on(t.subjectId, t.status),
     index('idx_nodes_topic_embedding').using('hnsw', t.topicEmbedding.op('vector_cosine_ops')),
+    unique('nodes_slug_per_subject_unique').on(t.subjectId, t.slug),
   ],
 )
 
@@ -219,6 +225,8 @@ export const profiles = pgTable('profiles', {
     .primaryKey()
     .references(() => authUsers.id, { onDelete: 'cascade' }),
   preferredFormat: preferredFormat('preferred_format').notNull().default('text'),
+  displayName: text('display_name'),
+  interests: text('interests').array().notNull().default(sql`'{}'::text[]`),
   activeHours: text('active_hours').array().notNull().default(sql`'{}'::text[]`),
   recurringMistakes: text('recurring_mistakes')
     .array()

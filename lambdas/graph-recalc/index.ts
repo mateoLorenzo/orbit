@@ -1,8 +1,13 @@
 import type { SQSEvent, SQSHandler } from 'aws-lambda'
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs'
 import { eq, and, inArray, or } from 'drizzle-orm'
+import { Resource } from 'sst'
 import { getDb, schema } from '../_shared/db'
 import { embed } from '../_shared/voyage'
+import { slugify, uniquifySlug } from '../_shared/slug'
 import { summarizeFile, synthesizeGraph } from './synth'
+
+const sqs = new SQSClient({})
 
 interface RecalcPayload {
   subjectId: string
@@ -128,6 +133,8 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     let createdCount = 0
     let updatedCount = 0
 
+    const usedSlugs = new Set<string>(existingNodes.map((n) => n.slug))
+
     for (const [key, synthNode] of synthByTitle) {
       const existing = existingByTitle.get(key)
       if (existing) {
@@ -150,6 +157,8 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         }
         titleToId.set(key, existing.id)
       } else {
+        const slug = uniquifySlug(slugify(synthNode.title), usedSlugs)
+        usedSlugs.add(slug)
         const [created] = await db
           .insert(schema.nodes)
           .values({
@@ -157,6 +166,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
             subjectId,
             title: synthNode.title,
             contentBrief: synthNode.contentBrief,
+            slug,
           })
           .returning({ id: schema.nodes.id })
         titleToId.set(key, created.id)
@@ -229,6 +239,39 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       }
     }
 
+    // Fan out lesson-text generation for new + updated nodes.
+    const nodesToGenerate: string[] = []
+    for (const [key] of synthByTitle) {
+      const id = titleToId.get(key)
+      if (!id) continue
+      const wasUpdated = nodesNeedingEmbedding.some((n) => n.id === id)
+      const hasReady = await hasReadyLesson(db, id)
+      if (wasUpdated || !hasReady) {
+        nodesToGenerate.push(id)
+      }
+    }
+
+    for (const nodeId of nodesToGenerate) {
+      await sqs.send(
+        new SendMessageCommand({
+          QueueUrl: Resource.LessonTextGenerationQueue.url,
+          MessageBody: JSON.stringify({ nodeId, subjectId }),
+        }),
+      )
+    }
+    console.log('graph-recalc: fan-out lesson-text', { subjectId, count: nodesToGenerate.length })
+
+    // TODO Plan 4: re-enable when FAL/Higgsfield billing is ready.
+    // for (const nodeId of nodesToGenerate) {
+    //   await sqs.send(
+    //     new SendMessageCommand({
+    //       QueueUrl: Resource.ImageGenerationQueue.url,
+    //       MessageBody: JSON.stringify({ nodeId, subjectId }),
+    //     }),
+    //   )
+    // }
+    // console.log('graph-recalc: fan-out image-gen', { subjectId, count: nodesToGenerate.length })
+
     console.log('graph-recalc: done', {
       subjectId,
       synthNodes: synth.nodes.length,
@@ -238,4 +281,21 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       edges: edgesToInsert.length,
     })
   }
+}
+
+async function hasReadyLesson(
+  db: ReturnType<typeof getDb>,
+  nodeId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ status: schema.nodeContent.status })
+    .from(schema.nodeContent)
+    .where(
+      and(
+        eq(schema.nodeContent.nodeId, nodeId),
+        eq(schema.nodeContent.contentType, 'lesson_text'),
+      ),
+    )
+    .limit(1)
+  return row?.status === 'ready'
 }

@@ -18,6 +18,8 @@ function jsonRequest(method: string, body?: unknown): Request {
 
 const seed = {
   userId: 'demo',
+  displayName: null,
+  interests: [] as string[],
   preferredFormat: 'text' as const,
   activeHours: [] as string[],
   recurringMistakes: [] as string[],

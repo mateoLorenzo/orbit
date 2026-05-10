@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Host_Grotesk, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AppProvider } from '@/lib/app-context'
+import { QueryProvider } from '@/lib/query/provider'
 import './globals.css'
 
 const hostGrotesk = Host_Grotesk({
@@ -51,7 +52,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={`bg-background ${hostGrotesk.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased min-h-screen">
-        <AppProvider>{children}</AppProvider>
+        <QueryProvider>
+          <AppProvider>{children}</AppProvider>
+        </QueryProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

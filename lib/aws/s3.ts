@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 let cached: S3Client | null = null
@@ -29,4 +29,19 @@ export async function presignUpload(opts: {
     ContentType: opts.contentType,
   })
   return getSignedUrl(client(), cmd, { expiresIn: opts.expiresIn ?? 900 })
+}
+
+export async function deleteObject(key: string) {
+  await client().send(new DeleteObjectCommand({ Bucket: ORIGINALS_BUCKET(), Key: key }))
+}
+
+export const ARTIFACTS_BUCKET = () => {
+  const v = process.env.S3_ARTIFACTS_BUCKET
+  if (!v) throw new Error('S3_ARTIFACTS_BUCKET is not set')
+  return v
+}
+
+export async function presignArtifactGet(key: string, expiresIn = 3600): Promise<string> {
+  const cmd = new GetObjectCommand({ Bucket: ARTIFACTS_BUCKET(), Key: key })
+  return getSignedUrl(client(), cmd, { expiresIn })
 }
