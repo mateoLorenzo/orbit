@@ -57,7 +57,7 @@ export default function HomePage() {
 
   const handleStartChallenge = () => {
     if (!dailyChallenge) return
-    router.push(`/subjects/${dailyChallenge.subject.id}`)
+    router.push(`/subjects/${dailyChallenge.subject.slug}`)
   }
 
   if (isLoading) {
@@ -205,7 +205,7 @@ export default function HomePage() {
             {/* Subject grid */}
             <SubjectGrid
               subjects={visibleSubjects}
-              onSelectSubject={(subject: Subject) => router.push(`/subjects/${subject.id}`)}
+              onSelectSubject={(subject: Subject) => router.push(`/subjects/${subject.slug}`)}
               getProgress={getSubjectProgress}
             />
           </div>
