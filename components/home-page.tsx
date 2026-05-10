@@ -9,6 +9,7 @@ import type { Subject, ContentNode } from '@/lib/types'
 import SubjectGrid from '@/components/subject-grid'
 import AddSubjectModal from '@/components/add-subject-modal'
 import { ArrowRight, Flame, Plus } from 'lucide-react'
+import Image from 'next/image'
 import AppSidebar from '@/components/app-sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -119,13 +120,13 @@ export default function HomePage() {
               aria-label="Progreso de la carrera"
               className="relative flex h-[220px] flex-col gap-6 overflow-hidden rounded-xl bg-[#ff4f00] p-6 text-white"
             >
-              <div
+              <Image
                 aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  backgroundImage:
-                    'radial-gradient(120% 120% at 100% 50%, rgba(0,0,0,0.18) 0%, transparent 55%)',
-                }}
+                src="/svg/logo-vector.svg"
+                alt=""
+                width={323}
+                height={196}
+                className="pointer-events-none absolute right-0 top-0 h-full w-auto"
               />
               <div className="relative flex flex-1 flex-col gap-4 font-medium tracking-[-0.5px]">
                 <p className="text-base leading-none opacity-50">Progreso de la carrera</p>
@@ -152,13 +153,13 @@ export default function HomePage() {
               aria-label="Desafío del día"
               className="relative flex h-[220px] flex-col gap-6 overflow-hidden rounded-xl bg-black p-6 text-white"
             >
-              <div
+              <Image
                 aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  backgroundImage:
-                    'radial-gradient(120% 120% at 100% 50%, rgba(255,255,255,0.06) 0%, transparent 55%)',
-                }}
+                src="/svg/logo-vector-2.svg"
+                alt=""
+                width={323}
+                height={196}
+                className="pointer-events-none absolute right-0 top-0 h-full w-auto"
               />
               <div className="relative flex flex-1 flex-col gap-4 font-medium tracking-[-0.5px]">
                 <p className="text-base leading-none opacity-50">Desafío del día</p>

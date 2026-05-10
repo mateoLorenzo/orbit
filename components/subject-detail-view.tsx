@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -405,14 +406,13 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
 
       <main className="min-w-0 flex-1">
         <div className="mx-auto flex max-w-[1352px] flex-col gap-6 p-6">
-          <button
-            type="button"
-            onClick={() => router.push('/')}
+          <Link
+            href="/"
             className="inline-flex h-10 items-center gap-1 self-start rounded-lg border border-black/12 px-3 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-black/4"
           >
             <ArrowLeft className="size-5" strokeWidth={2} />
             Volver
-          </button>
+          </Link>
 
           <h1 className="text-[40px] font-medium leading-none tracking-[-0.5px]">
             {subject.name}

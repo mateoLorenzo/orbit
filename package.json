@@ -23,6 +23,8 @@
     "@aws-sdk/client-polly": "^3.1045.0",
     "@aws-sdk/s3-request-presigner": "^3.1045.0",
     "@hookform/resolvers": "^3.9.1",
+    "@json-render/core": "^0.19.0",
+    "@json-render/react": "^0.19.0",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
     "@radix-ui/react-aspect-ratio": "1.1.8",

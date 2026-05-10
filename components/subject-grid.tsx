@@ -41,7 +41,7 @@ function SubjectCard({ subject, progress, color, onClick }: SubjectCardProps) {
       />
 
       <div className="w-full">
-        <h3 className="w-full truncate text-2xl font-medium leading-none tracking-[-0.5px] text-black">
+        <h3 className="w-full truncate text-2xl font-medium leading-tight tracking-[-0.5px] text-black">
           {subject.name}
         </h3>
       </div>
