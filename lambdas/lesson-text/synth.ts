@@ -1,13 +1,24 @@
-import { callTool } from '../_shared/anthropic'
+import { z } from 'zod'
+import { generate } from '../_shared/ai'
 
-export interface LessonText {
-  paragraphs: string[]
-  quiz: Array<{
-    question: string
-    options: string[]   // exactly 4
-    correctIndex: number  // 0-3
-  }>
-}
+const LessonTextSchema = z.object({
+  paragraphs: z
+    .array(z.string().min(50).max(800))
+    .min(3)
+    .max(4),
+  quiz: z
+    .array(
+      z.object({
+        question: z.string().min(10).max(250),
+        options: z.array(z.string().min(1).max(200)).length(4),
+        correctIndex: z.number().int().min(0).max(3),
+      }),
+    )
+    .min(2)
+    .max(3),
+})
+
+export type LessonText = z.infer<typeof LessonTextSchema>
 
 interface SynthInput {
   subjectName: string
@@ -28,37 +39,6 @@ Reglas:
 5. Si el estudiante tiene intereses cargados, usalos como contexto analógico EN LOS PÁRRAFOS (no en las preguntas), sin distorsionar la precisión.
 6. Tono: explicativo, claro, segunda persona singular ("podés ver que...").`
 
-const TOOL_SCHEMA = {
-  type: 'object',
-  properties: {
-    paragraphs: {
-      type: 'array',
-      items: { type: 'string', minLength: 50, maxLength: 800 },
-      minItems: 3,
-      maxItems: 4,
-    },
-    quiz: {
-      type: 'array',
-      minItems: 2,
-      maxItems: 3,
-      items: {
-        type: 'object',
-        properties: {
-          question: { type: 'string', minLength: 10, maxLength: 250 },
-          options: {
-            type: 'array',
-            items: { type: 'string', minLength: 1, maxLength: 200 },
-            minItems: 4,
-            maxItems: 4,
-          },
-          correctIndex: { type: 'integer', minimum: 0, maximum: 3 },
-        },
-        required: ['question', 'options', 'correctIndex'],
-      },
-    },
-  },
-  required: ['paragraphs', 'quiz'],
-}
 
 export async function generateLessonText(input: SynthInput): Promise<LessonText> {
   const interestsLine =
@@ -78,13 +58,14 @@ ${input.chunks.map((c, i) => `--- chunk ${i + 1} ---\n${c}`).join('\n\n')}${inte
 
 Generá la lección con párrafos + quiz.`
 
-  return callTool<LessonText>({
-    model: 'fast',
+  return generate({
+    tier: 'fast',
+    schema: LessonTextSchema,
+    schemaName: 'LessonText',
+    schemaDescription:
+      'Lección estructurada con párrafos explicativos y quiz multiple-choice. 3-4 párrafos, 2-3 preguntas con 4 opciones cada una y un correctIndex.',
     system: SYSTEM,
-    user: userPrompt,
-    toolName: 'submit_lesson',
-    toolDescription: 'Devuelve la lección estructurada con párrafos explicativos y quiz multiple-choice.',
-    inputSchema: TOOL_SCHEMA,
+    prompt: userPrompt,
     maxTokens: 4096,
   })
 }
