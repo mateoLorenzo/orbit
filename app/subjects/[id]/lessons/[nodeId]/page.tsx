@@ -10,6 +10,7 @@ import { useNodeAssets } from '@/lib/hooks/use-assets'
 import { mapSubjectRow } from '@/lib/domain/adapters'
 import { isDemoSubject, getDemoLessons, getDemoNode } from '@/lib/demo'
 import type { ContentNode } from '@/lib/types'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LessonPage() {
   const params = useParams()
@@ -30,11 +31,20 @@ export default function LessonPage() {
 
   if (subjectQuery.isLoading) {
     return (
-      <div className="flex min-h-screen bg-[#f8f8f8] text-black">
-        <AppSidebar />
-        <main className="flex min-w-0 flex-1 items-center justify-center">
-          <p className="text-base text-black/50">Cargando lección...</p>
-        </main>
+      <div className="flex h-screen flex-col bg-[#f8f8f8] text-black">
+        <Skeleton className="mx-6 mt-6 h-2 rounded-full" />
+        <div className="flex min-h-0 flex-1 gap-6 p-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Skeleton className="h-7 w-1/3" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-10/12" />
+            <Skeleton className="mt-4 h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-9/12" />
+          </div>
+          <Skeleton className="h-[480px] w-[420px] rounded-xl" />
+        </div>
       </div>
     )
   }
@@ -119,11 +129,20 @@ export default function LessonPage() {
 
   if (!lessonData) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-[#f8f8f8] text-center">
-        <div className="size-10 animate-spin rounded-full border-2 border-black/10 border-t-black" />
-        <p className="text-base font-medium tracking-[-0.32px] text-black/60">
-          Generando lección a partir de tus materiales...
-        </p>
+      <div className="flex h-screen flex-col bg-[#f8f8f8] text-black">
+        <Skeleton className="mx-6 mt-6 h-2 rounded-full" />
+        <div className="flex min-h-0 flex-1 gap-6 p-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Skeleton className="h-7 w-1/3" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-10/12" />
+            <Skeleton className="mt-4 h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-9/12" />
+          </div>
+          <Skeleton className="h-[480px] w-[420px] rounded-xl" />
+        </div>
       </div>
     )
   }

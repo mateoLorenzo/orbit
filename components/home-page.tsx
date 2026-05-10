@@ -10,6 +10,7 @@ import SubjectGrid from '@/components/subject-grid'
 import AddSubjectModal from '@/components/add-subject-modal'
 import { ArrowRight, Flame, Plus } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function flattenContent(nodes: ContentNode[]): ContentNode[] {
   return nodes.flatMap((n) => [n, ...(n.children ? flattenContent(n.children) : [])])
@@ -69,8 +70,23 @@ export default function HomePage() {
     return (
       <div className="flex min-h-screen bg-[#f8f8f8] text-black">
         <AppSidebar />
-        <main className="flex min-w-0 flex-1 items-center justify-center">
-          <p className="text-base text-black/50">Cargando materias...</p>
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto flex max-w-[1352px] flex-col gap-6 p-6">
+            <Skeleton className="h-9 w-72" />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <Skeleton className="h-32 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-9 w-56" />
+              <Skeleton className="h-10 w-40 rounded-lg" />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-[200px] rounded-xl" />
+              ))}
+            </div>
+          </div>
         </main>
       </div>
     )

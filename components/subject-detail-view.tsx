@@ -17,6 +17,7 @@ import { useFiles, useUploadFile, useDeleteFile } from '@/lib/hooks/use-files'
 import { useNodes } from '@/lib/hooks/use-nodes'
 import { mapFileRow } from '@/lib/domain/adapters'
 import { isDemoSubject, getDemoLessons } from '@/lib/demo'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ContentNode, Source, Subject } from '@/lib/types'
 
 type TabType = 'clases' | 'documentacion'
@@ -294,8 +295,10 @@ function DocumentationTable({ sources, onDownload, onDelete, isLoading }: Docume
       </div>
 
       {isLoading ? (
-        <div className="px-6 py-10 text-center text-base text-black/50">
-          Cargando documentos...
+        <div className="flex flex-col gap-3 px-6 py-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
         </div>
       ) : sources.length === 0 ? (
         <div className="px-6 py-10 text-center text-base text-black/50">
@@ -480,8 +483,10 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
 
           {activeTab === 'clases' ? (
             nodesQuery.isLoading ? (
-              <div className="px-6 py-10 text-center text-base text-black/50">
-                Cargando lecciones...
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[431px] rounded-xl" />
+                ))}
               </div>
             ) : lessons.length === 0 ? (
               <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
