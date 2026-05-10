@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSubject, listProgressForSubject } from '@/lib/db/queries'
+import { getSubjectBySlug, listProgressForSubject } from '@/lib/db/queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,9 +7,9 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params
-  const subject = await getSubject(id)
+  const { id: slug } = await params
+  const subject = await getSubjectBySlug(slug)
   if (!subject) return NextResponse.json({ error: 'not found' }, { status: 404 })
-  const progress = await listProgressForSubject(id)
+  const progress = await listProgressForSubject(subject.id)
   return NextResponse.json({ progress })
 }

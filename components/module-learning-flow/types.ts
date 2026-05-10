@@ -5,6 +5,9 @@ export interface ModuleLearningFlowProps {
   node: ContentNode
   onExit: () => void
   onContinueNext?: () => void
+  lessonData?: GenericLessonData
+  audioSrc?: string
+  onLessonComplete?: (answers: number[]) => void | Promise<unknown>
 }
 
 export interface ContentStep {
@@ -55,4 +58,15 @@ export interface LessonNarration {
   audioSrc: string
   generatingDelayMs?: number
   lines: NarratedLine[][]
+}
+
+export interface GenericLessonData {
+  paragraphs: string[]
+  quiz: Array<{
+    question: string
+    options: string[]
+    correctIndex?: number
+  }>
+  videoSrc?: string
+  audioSrc?: string
 }

@@ -14,7 +14,11 @@ import {
   Plus,
 } from 'lucide-react'
 import AppSidebar from '@/components/app-sidebar'
-import { useApp } from '@/lib/app-context'
+import { useFiles, useUploadFile, useDeleteFile } from '@/lib/hooks/use-files'
+import { useNodes } from '@/lib/hooks/use-nodes'
+import { mapFileRow } from '@/lib/domain/adapters'
+import { isDemoSubject, getDemoLessons } from '@/lib/demo'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ContentNode, Source, Subject } from '@/lib/types'
 
 type TabType = 'clases' | 'documentacion'
@@ -32,6 +36,12 @@ function getSubjectProgress(subject: Subject): number {
   if (all.length === 0) return 0
   const completed = all.filter((n) => n.status === 'completado').length
   return Math.round((completed / all.length) * 100)
+}
+
+function getSubjectProgressFromLessons(lessons: ContentNode[]): number {
+  if (lessons.length === 0) return 0
+  const completed = lessons.filter((n) => n.status === 'completado').length
+  return Math.round((completed / lessons.length) * 100)
 }
 
 function getCardStates(content: ContentNode[]): CardState[] {
@@ -64,6 +74,26 @@ function formatDate(date: Date): string {
     month: 'short',
     year: 'numeric',
   }).format(date)
+}
+
+function nodeToContentNode(
+  n: { id: string; slug: string; title: string; contentBrief: string; progressStatus: 'locked' | 'available' | 'in_progress' | 'mastered' },
+  index: number,
+): ContentNode {
+  const statusMap = {
+    locked: 'pendiente',
+    available: 'pendiente',
+    in_progress: 'en-progreso',
+    mastered: 'completado',
+  } as const
+  return {
+    id: n.slug,
+    title: n.title,
+    description: n.contentBrief,
+    type: 'clase',
+    status: statusMap[n.progressStatus],
+    order: index + 1,
+  }
 }
 
 function statusLabel(status: Source['status']): string {
@@ -237,9 +267,11 @@ function LockedLessonCard({ index, node }: Omit<LessonCardProps, 'onStart'>) {
 interface DocumentationTableProps {
   sources: Source[]
   onDownload: (source: Source) => void
+  onDelete: (source: Source) => void
+  isLoading?: boolean
 }
 
-function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
+function DocumentationTable({ sources, onDownload, onDelete, isLoading }: DocumentationTableProps) {
   const headerCellClass =
     'flex flex-1 min-w-px items-center px-6 py-4 text-base font-medium tracking-[-0.32px] text-black opacity-40'
   const cellClass =
@@ -263,7 +295,13 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
         <div className={headerCellClass}>Acciones</div>
       </div>
 
-      {sources.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col gap-3 px-6 py-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
+        </div>
+      ) : sources.length === 0 ? (
         <div className="px-6 py-10 text-center text-base text-black/50">
           Aún no se cargaron documentos.
         </div>
@@ -280,7 +318,7 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
             <div className={cellClass}>{source.size}</div>
             <div className={cellClass}>{statusLabel(source.status)}</div>
             <div className={cellClass}>{formatDate(new Date(source.uploadedAt))}</div>
-            <div className="flex flex-1 min-w-px items-center px-6 py-4">
+            <div className="flex flex-1 min-w-px items-center gap-2 px-6 py-4">
               <button
                 type="button"
                 onClick={() => onDownload(source)}
@@ -288,6 +326,13 @@ function DocumentationTable({ sources, onDownload }: DocumentationTableProps) {
               >
                 <ArrowDownToLine className="size-4" strokeWidth={2} />
                 Descargar
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(source)}
+                className="inline-flex h-8 items-center gap-1 rounded-lg border border-red-300 px-2 text-sm font-medium tracking-[-0.28px] text-red-600 transition-colors hover:bg-red-50"
+              >
+                Eliminar
               </button>
             </div>
           </div>
@@ -303,18 +348,30 @@ interface SubjectDetailViewProps {
 
 export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   const router = useRouter()
-  const { addSource } = useApp()
+  const filesQuery = useFiles(subject.slug)
+  const uploadMutation = useUploadFile(subject.slug)
+  const deleteMutation = useDeleteFile(subject.slug)
+  const sources = (filesQuery.data ?? []).map(mapFileRow)
   const [activeTab, setActiveTab] = useState<TabType>('clases')
   const [page, setPage] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const progress = useMemo(() => getSubjectProgress(subject), [subject])
-  const cardStates = useMemo(() => getCardStates(subject.content), [subject.content])
+  const isDemo = isDemoSubject(subject)
+  const nodesQuery = useNodes(isDemo ? '' : subject.slug)
+  const lessons: ContentNode[] = useMemo(
+    () =>
+      isDemo
+        ? getDemoLessons()
+        : (nodesQuery.data ?? []).map((n, i) => nodeToContentNode(n, i)),
+    [isDemo, nodesQuery.data],
+  )
+  const progress = useMemo(() => getSubjectProgressFromLessons(lessons), [lessons])
+  const cardStates = useMemo(() => getCardStates(lessons), [lessons])
 
-  const totalPages = Math.max(1, Math.ceil(subject.content.length / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(lessons.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
   const startIndex = safePage * PAGE_SIZE
-  const visibleClasses = subject.content.slice(startIndex, startIndex + PAGE_SIZE)
+  const visibleClasses = lessons.slice(startIndex, startIndex + PAGE_SIZE)
   const visibleStates = cardStates.slice(startIndex, startIndex + PAGE_SIZE)
 
   const onAddDocumentsClick = () => {
@@ -323,19 +380,15 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
 
   const onFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
-    files
-      .filter((f) => f.type === 'application/pdf')
-      .forEach((file) => {
-        const newSource: Source = {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          name: file.name,
-          type: 'pdf',
-          size: formatFileSize(file.size),
-          uploadedAt: new Date(),
-          status: 'ready',
-        }
-        addSource(subject.id, newSource)
-      })
+    const accepted = files.filter((f) =>
+      f.type === 'application/pdf' ||
+      f.type === 'application/msword' ||
+      f.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      f.type.startsWith('image/'),
+    )
+    for (const file of accepted) {
+      uploadMutation.mutate(file)
+    }
     e.target.value = ''
   }
 
@@ -344,7 +397,7 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
   }
 
   const onStartLesson = (node: ContentNode) => {
-    router.push(`/subjects/${subject.id}/lessons/${node.id}`)
+    router.push(`/subjects/${subject.slug}/lessons/${node.id}`)
   }
 
   return (
@@ -429,10 +482,19 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
           />
 
           {activeTab === 'clases' ? (
-            subject.content.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl bg-white px-6 py-16 text-center">
-                <p className="text-base text-black/50">
-                  Aún no hay clases para esta materia.
+            nodesQuery.isLoading ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[431px] rounded-xl" />
+                ))}
+              </div>
+            ) : lessons.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+                <p className="text-base font-medium tracking-[-0.32px] text-black">
+                  Estamos generando las lecciones a partir de tus PDFs.
+                </p>
+                <p className="text-sm text-black/50">
+                  Esto suele tomar 1-3 minutos. Esta página se va a actualizar sola.
                 </p>
               </div>
             ) : (
@@ -495,7 +557,12 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
               </>
             )
           ) : (
-            <DocumentationTable sources={subject.sources} onDownload={onDownloadSource} />
+            <DocumentationTable
+              sources={sources}
+              onDownload={onDownloadSource}
+              onDelete={(source) => deleteMutation.mutate(source.id)}
+              isLoading={filesQuery.isLoading}
+            />
           )}
         </div>
       </main>

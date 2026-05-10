@@ -1,16 +1,22 @@
 'use client'
 
-import { Folder, Settings2, User } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Folder, Settings2 } from 'lucide-react'
 
 export default function AppSidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-[88px] shrink-0 flex-col items-center gap-6 border-r border-black/8 p-6">
-      <div
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#e1e1e1] text-black/45"
-        aria-hidden
-      >
-        <User className="size-5" strokeWidth={2} />
-      </div>
+      <Link href="/" aria-label="Ir al inicio" className="shrink-0">
+        <Image
+          src="/svg/icon.svg"
+          alt="Orbit"
+          width={40}
+          height={40}
+          className="size-10"
+          priority
+        />
+      </Link>
       <div className="h-px w-4 shrink-0 bg-black/8" aria-hidden />
 
       <nav className="flex flex-1 flex-col items-center gap-3">

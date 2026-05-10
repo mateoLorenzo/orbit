@@ -8,7 +8,7 @@ import { IntroScreen } from './intro-screen'
 import { FlowHeader } from './primitives'
 import { QuizScreen } from './quiz-screen'
 import { TimelineScreen } from './timeline-screen'
-import { buildSteps } from './steps'
+import { buildSteps, buildStepsFromData } from './steps'
 import type { ModuleLearningFlowProps, Step } from './types'
 import { useNarrationAudio } from './use-narration-audio'
 
@@ -17,20 +17,28 @@ export default function ModuleLearningFlow({
   node,
   onExit,
   onContinueNext,
+  lessonData,
+  onLessonComplete,
 }: ModuleLearningFlowProps) {
-  const steps = useMemo(() => buildSteps(node), [node])
+  const steps = useMemo(
+    () => (lessonData ? buildStepsFromData(lessonData) : buildSteps(node)),
+    [lessonData, node],
+  )
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [selections, setSelections] = useState<Record<number, number>>({})
+  const [submitted, setSubmitted] = useState(false)
 
   const step = steps[currentStep]
   const hasCruceNarration = node.title === 'El Cruce de los Andes'
   const isFirstLessonAnimatedSlide =
+    !lessonData &&
     hasCruceNarration &&
     currentStep === 1 &&
     step.kind === 'content' &&
     step.paragraphs.length >= 3
   const isSecondLessonAnimatedSlide =
+    !lessonData &&
     hasCruceNarration &&
     currentStep === 3 &&
     step.kind === 'content' &&
@@ -89,7 +97,17 @@ export default function ModuleLearningFlow({
 
   const goNext = () => {
     setDirection('forward')
-    if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1)
+    if (currentStep < steps.length - 1) {
+      const nextIndex = currentStep + 1
+      setCurrentStep(nextIndex)
+      if (steps[nextIndex]?.kind === 'done' && onLessonComplete && !submitted) {
+        const answers = steps
+          .map((s, i) => (s.kind === 'quiz' ? selections[i] ?? -1 : null))
+          .filter((a): a is number => a !== null)
+        setSubmitted(true)
+        void Promise.resolve(onLessonComplete(answers))
+      }
+    }
   }
 
   const goPrev = () => {
