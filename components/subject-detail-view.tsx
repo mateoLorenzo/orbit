@@ -396,6 +396,12 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
     router.push(`/subjects/${subject.slug}/lessons/${node.id}`)
   }
 
+  // Wait for nodes (when not demo) before rendering the animated content,
+  // so animations don't kick off while the cards below are still skeletons.
+  if (!isDemo && nodesQuery.isLoading) {
+    return <SubjectDetailSkeleton />
+  }
+
   return (
     <div className="flex min-h-screen bg-[#f8f8f8] text-black">
       <AppSidebar />
@@ -404,19 +410,19 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
         <div className="mx-auto flex max-w-[1352px] flex-col gap-6 p-6">
           <Link
             href="/"
-            className="inline-flex h-10 items-center gap-1 self-start rounded-lg border border-black/12 px-3 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-black/4"
+            className="inline-flex h-10 items-center gap-1 self-start rounded-lg border border-black/12 px-3 text-base font-medium tracking-[-0.32px] text-black transition-colors hover:bg-black/4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100 fill-mode-backwards"
           >
             <ArrowLeft className="size-5" strokeWidth={2} />
             Volver
           </Link>
 
-          <h1 className="text-[40px] font-medium leading-none tracking-[-0.5px]">
+          <h1 className="text-[40px] font-medium leading-none tracking-[-0.5px] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-backwards">
             {subject.name}
           </h1>
 
           <section
             aria-label="Progreso de la materia"
-            className="overflow-hidden rounded-xl border border-black/8 bg-[#f8f8f8] px-5 pb-6 pt-5"
+            className="overflow-hidden rounded-xl border border-black/8 bg-[#f8f8f8] px-5 pb-6 pt-5 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-300 fill-mode-backwards"
           >
             <div className="flex flex-wrap items-start justify-between gap-4 text-xl font-medium leading-[1.2] tracking-[-0.32px] text-black">
               <p>Progreso de la materia</p>
@@ -430,7 +436,7 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
             </div>
           </section>
 
-          <div className="flex w-full items-start gap-6">
+          <div className="flex w-full items-start gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-450 fill-mode-backwards">
             <div className="flex flex-1 min-w-px items-start">
               <button
                 type="button"
@@ -499,31 +505,31 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
                   {visibleClasses.map((node, i) => {
                     const state = visibleStates[i]
                     const absoluteIndex = startIndex + i
+                    const wrapperClass =
+                      'animate-in fade-in slide-in-from-bottom-2 duration-700 fill-mode-backwards'
+                    const wrapperStyle = { animationDelay: `${i * 90 + 600}ms` }
                     if (state === 'completed') {
                       return (
-                        <CompletedLessonCard
-                          key={node.id}
-                          index={absoluteIndex}
-                          node={node}
-                        />
+                        <div key={node.id} className={wrapperClass} style={wrapperStyle}>
+                          <CompletedLessonCard index={absoluteIndex} node={node} />
+                        </div>
                       )
                     }
                     if (state === 'active') {
                       return (
-                        <ActiveLessonCard
-                          key={node.id}
-                          index={absoluteIndex}
-                          node={node}
-                          onStart={() => onStartLesson(node)}
-                        />
+                        <div key={node.id} className={wrapperClass} style={wrapperStyle}>
+                          <ActiveLessonCard
+                            index={absoluteIndex}
+                            node={node}
+                            onStart={() => onStartLesson(node)}
+                          />
+                        </div>
                       )
                     }
                     return (
-                      <LockedLessonCard
-                        key={node.id}
-                        index={absoluteIndex}
-                        node={node}
-                      />
+                      <div key={node.id} className={wrapperClass} style={wrapperStyle}>
+                        <LockedLessonCard index={absoluteIndex} node={node} />
+                      </div>
                     )
                   })}
                 </div>
@@ -560,6 +566,30 @@ export default function SubjectDetailView({ subject }: SubjectDetailViewProps) {
               isLoading={filesQuery.isLoading}
             />
           )}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export function SubjectDetailSkeleton() {
+  return (
+    <div className="flex min-h-screen bg-[#f8f8f8] text-black">
+      <AppSidebar />
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto flex max-w-[1352px] flex-col gap-6 p-6">
+          <Skeleton className="h-10 w-24 rounded-lg" />
+          <Skeleton className="h-12 w-2/3" />
+          <Skeleton className="h-24 rounded-xl" />
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[431px] rounded-xl" />
+            ))}
+          </div>
         </div>
       </main>
     </div>

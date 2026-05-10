@@ -7,7 +7,7 @@ export const HISTORIA_LESSONS: ContentNode[] = [
     description:
       'La estrategia militar y política de José de San Martín para liberar Chile y avanzar sobre el Virreinato del Perú.',
     type: 'clase',
-    status: 'en-progreso',
+    status: 'completado',
     order: 1,
   },
   {
@@ -16,7 +16,7 @@ export const HISTORIA_LESSONS: ContentNode[] = [
     description:
       'Las tensiones políticas y sociales que impulsaron el inicio del proceso independentista en el Río de la Plata.',
     type: 'clase',
-    status: 'completado',
+    status: 'en-progreso',
     order: 2,
   },
   {
