@@ -1,5 +1,6 @@
 {
-  "project-name": "<FILL THIS>",
-  "project-oneliner-spanish": "<FILL THIS>",
-  "project-description-spanish": "<FILL THIS>"
+  "project-name": "Orbit",
+  "project-oneliner-spanish": "El tutor con IA que solo enseña lo que vos subiste.",
+  "project-description-spanish": "Orbit convierte los apuntes, PDFs y videos que el estudiante sube en un camino de estudio personalizado. La IA arma un mapa de conceptos navegable, explica cada tema en cinco formatos (texto, infografía, audio, video y podcast a dos voces) y valida la comprensión con mini-quizzes antes de desbloquear el siguiente nodo. La regla central: el tutor IA solo enseña lo que está en el material subido — nunca inventa fuera de eso, así lo que estudiás es exactamente lo que cae en el examen.",
+  "deploy-url": "https://use-orbit.vercel.app/"
 }
