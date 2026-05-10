@@ -120,9 +120,7 @@ export default function ModuleLearningFlow({
     setSelections((prev) => ({ ...prev, [currentStep]: index }))
 
   const enterAnimation =
-    direction === 'forward'
-      ? 'animate-in fade-in slide-in-from-right-4 duration-500 ease-out'
-      : 'animate-in fade-in slide-in-from-left-4 duration-500 ease-out'
+    direction === 'forward' ? 'lesson-slide-up' : 'lesson-slide-down'
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8] text-black">
@@ -157,6 +155,7 @@ export default function ModuleLearningFlow({
             step={step}
             onBack={goPrev}
             onNext={goNext}
+            onExit={onExit}
             narrationState={narrationState}
             onVideoProgress={isVideoOnlyContent ? handleVideoProgress : undefined}
           />
