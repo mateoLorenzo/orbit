@@ -74,16 +74,18 @@ function OverlayIconButton({
 function NarratedSubtitle({
   wordsByLine,
   className,
+  fullAccessibleText,
 }: {
   wordsByLine: NarratedWord[][]
   className: string
+  fullAccessibleText?: string
 }) {
-  const fullText = wordsByLine
+  const visibleText = wordsByLine
     .map((line) => line.map((word) => word.text).join(' '))
     .join(' ')
   return (
     <p className={className}>
-      <span className="sr-only">{fullText}</span>
+      <span className="sr-only">{fullAccessibleText ?? visibleText}</span>
       <span aria-hidden>
         {wordsByLine.map((line, lineIdx) => (
           <span key={lineIdx}>
@@ -272,8 +274,24 @@ export function ContentScreen({
     ? step.paragraphs[narrationOffset + overlayParagraphIndex] ?? step.paragraphs[0] ?? ''
     : step.paragraphs.join(' ')
 
-  const subtitleClass =
-    'pointer-events-none absolute bottom-20 left-6 right-6 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] lg:left-24 lg:right-24'
+  // On mobile we render only the currently spoken narration line so subtitles
+  // stay tight (≤ 2 visual lines) instead of growing into a wall of text.
+  const activeParagraphLines = subtitleEnabled ? lines[overlayParagraphIndex] ?? [] : []
+  let activeLineIdx = 0
+  for (let i = 0; i < activeParagraphLines.length; i++) {
+    if (narrationState.currentTime >= activeParagraphLines[i].startSeconds) activeLineIdx = i
+    else break
+  }
+  const mobileOverlayWords =
+    overlayWords && overlayWords[activeLineIdx] ? [overlayWords[activeLineIdx]] : null
+  const displayedOverlayWords =
+    isMobileViewport && mobileOverlayWords ? mobileOverlayWords : overlayWords
+  const mobileFallbackText = activeParagraphLines[activeLineIdx]?.text ?? overlayFallbackText
+  const displayedFallbackText = isMobileViewport ? mobileFallbackText : overlayFallbackText
+
+  const subtitleClass = `pointer-events-none absolute bottom-20 left-6 right-6 text-center text-2xl font-medium leading-snug tracking-[-0.5px] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] lg:left-24 lg:right-24${
+    isMobileViewport ? ' line-clamp-2' : ''
+  }`
 
   const mediaElement = step.video ? (
     <video
@@ -351,15 +369,16 @@ export function ContentScreen({
           </div>
         ) : null}
 
-        {overlayWords && overlayWords.length > 0 ? (
+        {displayedOverlayWords && displayedOverlayWords.length > 0 ? (
           <NarratedSubtitle
-            key={overlayParagraphIndex}
-            wordsByLine={overlayWords}
+            key={`${overlayParagraphIndex}-${isMobileViewport ? activeLineIdx : 'full'}`}
+            wordsByLine={displayedOverlayWords}
             className={subtitleClass}
+            fullAccessibleText={overlayFallbackText}
           />
         ) : (
           <p className={subtitleClass} aria-live="polite">
-            {overlayFallbackText}
+            {displayedFallbackText}
           </p>
         )}
 

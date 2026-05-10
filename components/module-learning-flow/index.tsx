@@ -123,7 +123,7 @@ export default function ModuleLearningFlow({
     direction === 'forward' ? 'lesson-slide-up' : 'lesson-slide-down'
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8] text-black">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#f8f8f8] text-black">
       <audio
         ref={narrationState.audioRef}
         src={narrationState.audioSrc}
