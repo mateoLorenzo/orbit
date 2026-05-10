@@ -31,23 +31,7 @@ export default function LessonPage() {
   const onExit = () => router.push(`/subjects/${subjectSlug}`)
 
   if (subjectQuery.isLoading) {
-    return (
-      <div className="flex h-screen flex-col bg-[#f8f8f8] text-black">
-        <Skeleton className="mx-6 mt-6 h-2 rounded-full" />
-        <div className="flex min-h-0 flex-1 gap-6 p-6">
-          <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <Skeleton className="h-7 w-1/3" />
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-11/12" />
-            <Skeleton className="h-5 w-10/12" />
-            <Skeleton className="mt-4 h-5 w-full" />
-            <Skeleton className="h-5 w-11/12" />
-            <Skeleton className="h-5 w-9/12" />
-          </div>
-          <Skeleton className="h-[480px] w-[420px] rounded-xl" />
-        </div>
-      </div>
-    )
+    return <LessonPageSkeleton />
   }
 
   if (!subject) {
@@ -129,23 +113,7 @@ export default function LessonPage() {
     : undefined
 
   if (!lessonData) {
-    return (
-      <div className="flex h-screen flex-col bg-[#f8f8f8] text-black">
-        <Skeleton className="mx-6 mt-6 h-2 rounded-full" />
-        <div className="flex min-h-0 flex-1 gap-6 p-6">
-          <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <Skeleton className="h-7 w-1/3" />
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-11/12" />
-            <Skeleton className="h-5 w-10/12" />
-            <Skeleton className="mt-4 h-5 w-full" />
-            <Skeleton className="h-5 w-11/12" />
-            <Skeleton className="h-5 w-9/12" />
-          </div>
-          <Skeleton className="h-[480px] w-[420px] rounded-xl" />
-        </div>
-      </div>
-    )
+    return <LessonPageSkeleton />
   }
 
   return (
@@ -160,5 +128,53 @@ export default function LessonPage() {
       }
       onLessonComplete={(answers) => submitQuizMutation.mutateAsync(answers)}
     />
+  )
+}
+
+function LessonPageSkeleton() {
+  return (
+    <div className="flex h-screen flex-col overflow-hidden bg-[#f8f8f8] text-black">
+      {/* Header: title + progress bar (matches FlowHeader) */}
+      <div className="bg-[#f8f8f8]">
+        <div className="flex items-center justify-center px-6 py-3">
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="h-1 w-full bg-black/4">
+          <Skeleton className="h-full w-1/4 rounded-none bg-black/20" />
+        </div>
+      </div>
+
+      {/* Content area */}
+      <div className="flex min-h-0 flex-1 flex-col gap-6 px-6 py-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
+          {/* Left text card */}
+          <div className="flex w-full shrink-0 flex-col gap-3 overflow-hidden rounded-xl bg-white p-6 lg:w-[420px]">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-10/12" />
+            <div className="h-2" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-11/12" />
+            <Skeleton className="h-5 w-8/12" />
+            <div className="h-2" />
+            <Skeleton className="h-5 w-9/12" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-7/12" />
+          </div>
+
+          {/* Right media area */}
+          <Skeleton className="min-h-0 flex-1 rounded-xl" />
+        </div>
+
+        {/* Bottom action row */}
+        <div className="flex items-center gap-6">
+          <Skeleton className="h-10 w-24 rounded-lg" />
+          <div className="flex flex-1 justify-center">
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-10 w-28 rounded-lg" />
+        </div>
+      </div>
+    </div>
   )
 }
