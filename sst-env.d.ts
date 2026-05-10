@@ -10,6 +10,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "ArtifactsBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
     "AudioNarrationQueue": {
       "type": "sst.aws.Queue"
       "url": string
@@ -21,10 +25,6 @@ declare module "sst" {
     "AudioNarrator": {
       "name": string
       "type": "sst.aws.Function"
-    }
-    "ArtifactsBucket": {
-      "name": string
-      "type": "sst.aws.Bucket"
     }
     "DatabaseUrl": {
       "type": "sst.sst.Secret"
@@ -78,11 +78,11 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
-    "ImageGenQueueDlq": {
+    "ImageGenerationQueue": {
       "type": "sst.aws.Queue"
       "url": string
     }
-    "ImageGenerationQueue": {
+    "ImageGenerationQueueDlq": {
       "type": "sst.aws.Queue"
       "url": string
     }
