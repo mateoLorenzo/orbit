@@ -119,6 +119,19 @@ export default function ModuleLearningFlow({
   const handleSelect = (index: number) =>
     setSelections((prev) => ({ ...prev, [currentStep]: index }))
 
+  // When the user picks the wrong quiz option we send them back to the lesson
+  // before the quiz so they can review and re-attempt with a clean slate.
+  const handleWrongAnswer = () => {
+    const stepIndex = currentStep
+    setSelections((prev) => {
+      if (!(stepIndex in prev)) return prev
+      const next = { ...prev }
+      delete next[stepIndex]
+      return next
+    })
+    goPrev()
+  }
+
   const enterAnimation =
     direction === 'forward' ? 'lesson-slide-up' : 'lesson-slide-down'
 
@@ -170,6 +183,7 @@ export default function ModuleLearningFlow({
             onSelect={handleSelect}
             onContinue={goNext}
             onBack={goPrev}
+            onWrongAnswer={handleWrongAnswer}
           />
         )}
         {step.kind === 'done' && (

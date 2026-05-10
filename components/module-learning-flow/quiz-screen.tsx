@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, X } from 'lucide-react'
 import { PrimaryButton, SecondaryButton } from './primitives'
 import type { QuizStep } from './types'
@@ -10,10 +11,15 @@ interface QuizScreenProps {
   onSelect: (index: number) => void
   onContinue: () => void
   onBack: () => void
+  onWrongAnswer: () => void
 }
 
 const CORRECT_GREEN = '#17a758'
 const WRONG_RED = '#dc2626'
+// How long the red feedback animates before we send the user back to the
+// previous lesson step. Lines up with the option's 500ms color transition
+// plus a moment for the X badge zoom-in to settle.
+const WRONG_REDIRECT_MS = 1100
 
 export function QuizScreen({
   step,
@@ -21,10 +27,37 @@ export function QuizScreen({
   onSelect,
   onContinue,
   onBack,
+  onWrongAnswer,
 }: QuizScreenProps) {
   const isAnswered = selectedIndex !== null
   const correctIndex = step.correctIndex
   const userPickedCorrectly = isAnswered && selectedIndex === correctIndex
+  // Only the correct answer locks the quiz on success. A wrong pick triggers
+  // a redirect back to the previous lesson, so we also lock during the brief
+  // delay before the redirect fires.
+  const [isRedirectingAfterWrong, setIsRedirectingAfterWrong] = useState(false)
+  const redirectTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current !== null) {
+        window.clearTimeout(redirectTimerRef.current)
+      }
+    }
+  }, [])
+
+  const isLocked = userPickedCorrectly || isRedirectingAfterWrong
+
+  const handleOptionClick = (index: number) => {
+    if (isLocked) return
+    onSelect(index)
+    if (index !== correctIndex) {
+      setIsRedirectingAfterWrong(true)
+      redirectTimerRef.current = window.setTimeout(() => {
+        onWrongAnswer()
+      }, WRONG_REDIRECT_MS)
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10 lg:px-[10vw]">
@@ -41,26 +74,23 @@ export function QuizScreen({
         {step.options.map((option, index) => {
           const isCorrectOption = index === correctIndex
           const userPickedThis = index === selectedIndex
-          const showCorrect = isAnswered && isCorrectOption
-          const celebrate = showCorrect && userPickedCorrectly
-          const showWrong = isAnswered && userPickedThis && !isCorrectOption
-          const dimmed = isAnswered && !isCorrectOption && !userPickedThis
-          const selectedIdle = !isAnswered && userPickedThis
+          // Only show the correct answer (in green) once the user has picked it.
+          // Don't reveal it on a wrong pick — they should keep trying.
+          const celebrate = userPickedCorrectly && isCorrectOption
+          const showWrong = userPickedThis && !isCorrectOption
+          // Dim the other options only after the user has locked in the correct
+          // answer; otherwise keep them clickable for retries.
+          const dimmed = isLocked && !userPickedThis
 
           let stateClass: string
           if (celebrate) {
             stateClass =
               'border-[#17a758] bg-[#17a758]/8 text-[#17a758] shadow-[0_10px_32px_-8px_rgba(23,167,88,0.45)] scale-[1.02] ease-[cubic-bezier(0.34,1.56,0.64,1)]'
-          } else if (showCorrect) {
-            stateClass =
-              'border-[#17a758] bg-[#17a758]/6 text-[#17a758] shadow-[0_4px_16px_-8px_rgba(23,167,88,0.25)]'
           } else if (showWrong) {
             stateClass =
               'border-[#dc2626] bg-[#dc2626]/6 text-[#dc2626] shadow-[0_4px_16px_-8px_rgba(220,38,38,0.25)]'
           } else if (dimmed) {
             stateClass = 'border-transparent opacity-40'
-          } else if (selectedIdle) {
-            stateClass = 'border-black shadow-[0_4px_16px_rgba(0,0,0,0.08)]'
           } else {
             stateClass =
               'border-transparent hover:border-black/20 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
@@ -70,8 +100,8 @@ export function QuizScreen({
             <button
               key={option}
               type="button"
-              onClick={() => !isAnswered && onSelect(index)}
-              disabled={isAnswered}
+              onClick={() => handleOptionClick(index)}
+              disabled={isLocked}
               style={{ animationDelay: `${index * 80 + 250}ms` }}
               className={`relative flex min-h-16 w-full items-center justify-center rounded-xl border-2 bg-white px-6 py-3 text-2xl font-medium tracking-[-0.5px] text-black transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 animation-duration-500 fill-mode-backwards ${stateClass}`}
             >
@@ -89,7 +119,7 @@ export function QuizScreen({
 
               <span>{option}</span>
 
-              {showCorrect && (
+              {celebrate && (
                 <span
                   aria-hidden
                   className="absolute right-5 inline-flex size-7 items-center justify-center rounded-full text-white animate-in zoom-in-50 fade-in duration-500 ease-out"
