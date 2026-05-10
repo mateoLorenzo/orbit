@@ -31,7 +31,7 @@ export default function OnboardingLayout({ children }: { children: ReactNode }) 
         <header className="shrink-0">
           <div className="flex h-14 items-center justify-center">
             <span className="text-base font-medium tracking-[-0.32px] text-black">
-              Nueva materia
+              Onboarding
             </span>
           </div>
           <div className="h-[3px] w-full bg-black/8">

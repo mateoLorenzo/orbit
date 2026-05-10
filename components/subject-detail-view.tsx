@@ -146,7 +146,7 @@ function CompletedLessonCard({ index, node }: Omit<LessonCardProps, 'onStart'>) 
         {ESTIMATED_LESSON_MINUTES} min
       </div>
 
-      <div className="relative -mx-5 -mb-5 px-5 pb-5">
+      <div className="relative -mx-5 -mb-5 pl-5 pb-5">
         <div className="flex gap-3 overflow-hidden">
           <div className="relative h-40 w-[124px] shrink-0 overflow-hidden rounded-lg bg-black/5">
             <Image
@@ -176,10 +176,6 @@ function CompletedLessonCard({ index, node }: Omit<LessonCardProps, 'onStart'>) 
             />
           </div>
         </div>
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 w-12"
-          style={{ background: 'linear-gradient(to right, #fff, rgba(255,255,255,0))' }}
-        />
         <div
           className="pointer-events-none absolute inset-y-0 right-0 w-12"
           style={{ background: 'linear-gradient(to left, #fff, rgba(255,255,255,0))' }}

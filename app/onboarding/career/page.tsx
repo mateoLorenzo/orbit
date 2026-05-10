@@ -39,7 +39,6 @@ export default function OnboardingCareerPage() {
                 if (e.key === 'Enter' && canContinue) handleContinue()
               }}
               placeholder="Ingresa tu carrera"
-              autoFocus
               aria-label="Nombre de la carrera"
               className="w-full rounded-2xl bg-white px-8 py-6 text-center text-[22px] font-medium tracking-[-0.5px] text-black shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08)] outline-none transition-shadow placeholder:text-black/35 focus:shadow-[0_2px_20px_-4px_rgba(0,0,0,0.12)]"
             />
